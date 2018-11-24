@@ -1,0 +1,49 @@
+# depslib dependency file v1.0
+1542591401 source:c:\dev\cpp\fallengine\main.cpp
+	"include/fallengine.h"
+
+1542592294 c:\dev\cpp\fallengine\include\fallengine.h
+	"fallengine/game.h"
+	"fallengine/player.h"
+	"fallengine/table.h"
+	"fallengine/hand.h"
+	"fallengine/card.h"
+
+1542591580 c:\dev\cpp\fallengine\include\fallengine\game.h
+	<memory>
+	<vector>
+	<algorithm>
+	<utility>
+	<numeric>
+	<functional>
+	<array>
+	<type_traits>
+	"card.h"
+	"table.h"
+	"player.h"
+
+1542591748 c:\dev\cpp\fallengine\include\fallengine\card.h
+
+1542330888 c:\dev\cpp\fallengine\include\fallengine\table.h
+	<algorithm>
+	<utility>
+	<array>
+	"player.h"
+
+1542593081 c:\dev\cpp\fallengine\include\fallengine\player.h
+	<string>
+	<deque>
+	<memory>
+	<functional>
+	<algorithm>
+	<exception>
+	"hand.h"
+	"table.h"
+
+1542591580 c:\dev\cpp\fallengine\include\fallengine\hand.h
+	<string>
+	<vector>
+	<memory>
+	<algorithm>
+	"card.h"
+
