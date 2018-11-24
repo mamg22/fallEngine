@@ -17,7 +17,6 @@
  *
  *  This is fallEngine v1.0
  *  The open source Caida game engine
- *  License pending
  *
  *  All classes can be expanded to allow new game resources and data in them such as names, sprites, etc.
  *
