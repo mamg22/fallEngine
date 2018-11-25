@@ -28,8 +28,8 @@ SCENARIO("Cards can be compared", "[Card][Comparison]"){
                 THEN("Only ==, >= and <= should return true"){
                     REQUIRE(card_a == 5);
                     REQUIRE_FALSE(card_a != 5);
-                    REQUIRE(card_a < 5);
-                    REQUIRE_FALSE(card_a <= 5);
+                    REQUIRE_FALSE(card_a < 5);
+                    REQUIRE(card_a <= 5);
                     REQUIRE(card_a >= 5);
                     REQUIRE_FALSE(card_a > 5);
                 }
