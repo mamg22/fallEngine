@@ -5,13 +5,8 @@
    This main should do:
    Unit test on every function
    Some integration tests
-   A scripted test of all components based on a fixed random seed and scripted movements from the players, where:
-
-   TODO:
-   Escribir tests para TODO, basado en Catch2 (aprenderlo a usar)
-   Escribir documentacion para TODO, basado en doxygen (ditto)
-
-   Añadir la comparacion con ints de cards
+   A scripted test of all components based on a fixed random seed and scripted movements from the players
+     note: make a playable game first, record the movements, and put them in a file
 
  */
 
