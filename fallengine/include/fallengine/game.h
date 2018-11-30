@@ -1,188 +1,179 @@
-#ifndef PLAYER_H_INCLUDED
-#define PLAYER_H_INCLUDED
+#ifndef GAME_H_INCLUDED
+#define GAME_H_INCLUDED
 
-#include <string>
-#include <deque>
+
 #include <memory>
-#include <functional>
+#include <vector>
 #include <algorithm>
-#include <exception>
+#include <utility>
+#include <numeric>
+#include <functional>
+#include <array>
 
-template<bool Teamed, class Card_type>
-class Player;
-
-#include "hand.h"
+#include "card.h"
 #include "table.h"
+#include "player.h"
 
-class Null_partner_exception : public std::exception {
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+class Game {
 public:
-    virtual const char * what() const noexcept {
-        return "Used a player's partner when it has not been set (null partner), partner is requiered for"
-               "Teamed Players, not required for Non-teamed Players";
-    }
-};
-
-template<bool Teamed, class Card_type>
-class Player {
-public:
-    Player(int id, Table<Card_type>& current_table, Combo max_combo = Combo::Registro)
-        : m_current_table(current_table), m_hand(max_combo), m_id(id)
+    explicit Game(std::function<int()> random_engine, Combo max_combo_allowed = Combo::Registro)
+        : m_random_engine(random_engine), m_max_combo_allowed(max_combo_allowed)
     {
-    }
-
-    virtual ~Player() = default;
-
-    std::vector<Card_type>& get_cards()
-    {
-        return m_hand.get_cards();
-    }
-
-    // Select card, true if can select, else false
-    bool select(Card_type& card);
-
-    void pop_next() // Pops the next card selected
-    {
-        m_selection.pop_front();
-    }
-    void undo_select() // Pops the last card selected (undo)
-    {
-        m_selection.pop_back();
-    }
-    void reset_selection() // Clear selection
-    {
-        m_selection.clear();
-    }
-    const Card_type& next_selection() const // First card selected
-    {
-        return *m_selection.front();
-    }
-    const Card_type& last_selection() const // Last card selected
-    {
-        return *m_selection.back();
-    }
-    const std::deque<std::reference_wrapper<const Card_type>>& get_selection() const
-    {
-        return m_selection;
-    }
-
-    // Plays the current selection, true if (special move) "caida" has happened,
-    // else false
-    // with_caida shall be false if the deck is empty, hence end of round
-    bool play_cards(bool caida_enabled = true);
-
-    void reset_state();
-
-    void count_cards(int base);
-
-    void increase_score(int increment);
-
-
-    // Forwards to (member hand).set_cards, accepts a iterator pair of the deck
-    // from which the cards will be extracted
-    template<class FWIterator>
-    void set_cards(FWIterator begin, FWIterator end);
-
-    void set_partner(Player<Teamed, Card_type>& partner)
-    {
-        m_partner = &partner;
-    }
-
-    bool is_winner() const
-    {
-        return m_score >= 24;
-    }
-
-    int get_score() const
-    {
-        return m_score;
-    }
-
-    int get_cards_accumulated() const
-    {
-        return m_cards_accumulated;
-    }
-
-    Combo get_combo() const
-    {
-        return m_hand.combo();
-    }
-
-    std::string get_combo_name() const
-    {
-        return m_hand.combo_name();
-    }
-
-    int get_highest_card() const
-    {
-        return m_hand.highest_card();
-    }
-
-    int id() const
-    {
-        return m_id;
-    }
-
-    Player<Teamed, Card_type>& get_partner() const
-    {
-        if constexpr (Teamed){
-            if (m_partner){
-                return *m_partner;
-            }
-            else {
-                throw Null_partner_exception();
+        // fill cards from which table should copy
+        m_cards.reserve(40);
+        for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
+            for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas,
+                               Suit::Oros}){
+                m_cards.emplace_back(val, suit);
             }
         }
-        else {
-            throw Null_partner_exception();
-        }
+        m_players.reserve(4);
     }
 
-protected:
-    void increase_score_this_only(int increase)
+
+    virtual ~Game() = default;
+
+    enum class State {
+        Caida, // Player picked the card the previous player just placed, bonus points
+        Waiting_next_round, // No cards left in neither player's hands or table, new round should begin,
+        Table_clear, // Table cleared by player move, bonus points
+        Winner_found, // A winner has been found in this player's move, round begin (first deal) or round end (card count)
+        Last_deal, // This is the last deal of cards in the deck, Caida is disabled in last deal
+    };
+
+    // The game state should be indexed via enum class State members;
+    using Game_state = std::array<bool, 5>;
+
+    using Player_ptr = typename std::vector<Player_type>::iterator;
+
+    bool init_game();
+
+    template<class... Args>
+    void add_player(Args... args);
+
+    bool remove_player(int id);
+
+    Game_state step(bool count_from_4 = false); // count_from_4 only used when Waiting_next_round was returned before
+
+    std::vector<std::reference_wrapper<Player_type>> find_winners() const;
+
+    void order_players(int new_first_id);
+
+    void shuffle_players();
+
+    Player_type& current_player() const
     {
-        m_score += increase;
+        return *m_current_player;
+    }
+
+    Player_type& dealer() const
+    {
+        return *m_dealer;
+    }
+
+    Player_type& player_with_best_combo() const
+    {
+        return *m_best_combo_player;
+    }
+
+    const std::vector<Player_type>& get_players() const
+    {
+        return m_players;
     }
 
 private:
-    Table<Card_type>& m_current_table;
-    std::deque<std::reference_wrapper<const Card_type>> m_selection = {};
-    Hand<Card_type> m_hand;
+    auto rotate_player(Player_ptr player, int step) const;
+    void set_best_combo_player();
+    void count_cards();
 
-    int m_score = 0;
-    int m_cards_accumulated = 0;
-    int m_id;
+    std::vector<Card_type> m_cards = {};
+    Table_type m_table;
+    std::vector<Player_type> m_players = {};
 
-    Player<Teamed, Card_type>* m_partner = nullptr;
+    // Various player pointers, required for basic game functionality
+    Player_type* m_current_player = nullptr;
+    Player_type* m_dealer = nullptr;
+    Player_type* m_best_combo_player = nullptr;
+    Player_type* m_last_grab_player = nullptr;
+
+    std::function<int()> m_random_engine; // User must supply an random engine
+
+    bool m_is_playing = false;
+
+    Game_state m_last_game_state = {};
+
+    int m_id_count = 0; // Counter for the player IDs
+
+    Combo m_max_combo_allowed = Combo::Registro;
 };
 
-template<bool Teamed, class Card_type>
-template<class FWIterator>
-void Player<Teamed, Card_type>::set_cards(FWIterator begin, FWIterator end)
+//{ Game methods
+
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+auto Game<Teamed, Card_type, Player_type, Table_type>::rotate_player(Player_ptr player, int step) const
 {
-    m_hand.set_cards(begin, end);
+    if (step >= 0){
+        while (step--){
+            if (++player == m_players.end()){
+                player = m_players.begin();
+            }
+        }
+    }
+    else {
+        while (step++){
+            if (--player == m_players.rend()){
+                player = m_players.rbegin();
+            }
+        }
+    }
+    return player;
 }
 
-template<bool Teamed, class Card_type>
-bool Player<Teamed, Card_type>::select(Card_type& card)
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+void Game<Teamed, Card_type, Player_type, Table_type>::shuffle_players()
 {
-    auto& prev_select = next_selection();
+    std::shuffle(m_players.begin(), m_players.end(), std::forward<decltype(m_random_engine)>(m_random_engine));
+}
 
-    auto hand_begin = m_hand.get_cards().begin();
-    auto hand_end = m_hand.get_cards().end();
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+void Game<Teamed, Card_type, Player_type, Table_type>::order_players(int new_first_id)
+{
+    //TODO: Fix the swap calls, they don't compile, i'm still looking in what causes it, but it's about 250-500 lines of error in g++
+    auto new_first = std::find_if(m_players.begin(), m_players.end(), [&](Player_type& player){
+                                                                         return player.id() == new_first_id;
+                                                                     });
+    if constexpr (Teamed){ // Non teamed
+        std::rotate(m_players.begin(), new_first, m_players.end());
+    }
+    else { // teamed
+        std::swap(*m_players.begin(), *new_first);
+        std::swap(*(m_players.begin() + 2), new_first->get_partner());
+    }
 
-    // bool in_hand = (find_same_card(card, hand_begin, hand_end)== hand_end);
-    bool in_hand = (std::find_if(hand_begin, hand_end, is_same_card) != hand_end);
-    // Only add if:
-    // first card selected AND own hand only
-    // second card selected AND same value as last selected AND not in hand
-    // 3rd, 4th, ..., card selected AND same as last selected but increased by 1
-    // AND not in own hand
+}
 
-    if (  (  (m_selection.size() >= 2) && (card == prev_select + 1) && (!in_hand))
-       || (  (m_selection.size() == 1) && (card == prev_select) && (!in_hand))
-       || (  (m_selection.size() == 0) && (in_hand)) )
-    {
-        m_selection.emplace_back(card);
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+std::vector<std::reference_wrapper<Player_type>> Game<Teamed, Card_type, Player_type, Table_type>::find_winners() const
+{
+    std::vector<std::reference_wrapper<Player_type>> ret{};
+    for (auto& player : m_players){
+        if (player.is_winner()){
+            ret.emplace_back(player);
+        }
+    }
+    return ret;
+}
+
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+bool Game<Teamed, Card_type, Player_type, Table_type>::init_game()
+{
+    constexpr int cards_in_deck_after_deal = 36;
+    // only if is valid player count: 2+ players, and the remaining (36) cards are divided evenly between them
+    if ((m_players.size() >= 2) && ((cards_in_deck_after_deal / m_players.size()) % 3 == 0)){
+        m_table.set_deck(m_cards.begin(), m_cards.end());
+        m_is_playing = true;
+        m_last_game_state[State::Waiting_next_round] = true;
         return true;
     }
     else {
@@ -190,74 +181,159 @@ bool Player<Teamed, Card_type>::select(Card_type& card)
     }
 }
 
-template<bool Teamed, class Card_type>
-void Player<Teamed, Card_type>::reset_state()
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+template<class... Args>
+void Game<Teamed, Card_type, Player_type, Table_type>::add_player(Args... args)
 {
-    m_selection.clear();
-    m_hand.reset();
-    m_score = 0;
-    m_cards_accumulated = 0;
+    m_players.emplace_back(m_id_count++, m_table, m_max_combo_allowed, std::forward<Args>(args)...);
 }
 
-
-template<bool Teamed, class Card_type>
-void Player<Teamed, Card_type>::count_cards(int base)
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+bool Game<Teamed, Card_type, Player_type, Table_type>::remove_player(int id)
 {
-    increase_score(std::max(m_cards_accumulated - base, 0));
-}
-
-template<bool Teamed, class Card_type>
-bool Player<Teamed, Card_type>::play_cards(bool caida_enabled)
-{
-    auto select_beg = m_selection.begin();
-    auto select_end = m_selection.end();
-
-    increase_score(m_current_table.play_cards(select_beg, select_end));
-
-    if (m_selection.size() >= 2)
-    {
-        m_cards_accumulated += m_selection.size(); // No. of cards collected
-    }
-
-    bool has_caida = false;
-
-    // This checks for a "caida", where if the previous player placed a card
-    // and this player takes it with his own card of the same value, then it
-    // gives extra points
-    if (caida_enabled && (m_current_table.last_card_placed()) && (*(m_current_table.last_card_placed()) == *select_beg))
-    {
-        has_caida = true;
-        if ((1 <= *select_beg) && (*select_beg >= 7)){
-            increase_score(1);
-        }
-        else {
-            // just for cards in range 10..12
-            increase_score(*select_beg.value() - 8);
-        }
-    }
-    m_hand.erase(*select_beg);
-    m_selection.clear();
-    return has_caida;
-}
-
-template<bool Teamed, class Card_type>
-void Player<Teamed, Card_type>::increase_score(int increment)
-{
-    if constexpr(!Teamed){
-        m_score += increment;
+    if (auto player = std::find_if(m_players.begin(), m_players.end(), [&](Player_type& plyr){
+                                                                           return id == plyr.id();
+                                                                        }); player != m_players.end()){
+        m_players.erase(player);
+        return true;
     }
     else {
-        m_score += increment;
-        if (m_partner){
-            m_partner->increase_score_this_only(increment);
+        return false;
+    }
+}
+
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+typename Game<Teamed, Card_type, Player_type, Table_type>::Game_state
+Game<Teamed, Card_type, Player_type, Table_type>::step(bool count_from_4)
+{
+    Game_state ret{};
+    constexpr int cards_per_deck = 40;
+    // New code based on Game_state return
+    if (!(m_last_game_state[State::Waiting_next_round])){
+        // play cards, branch if caida happened
+        if (m_current_player->play_cards(!(m_table.is_deck_empty()))){
+            ret[State::Caida] = true;
         }
-        else {
-            // THROW AN EXCEPTION BECAUSE THE USER OF THIS LIBRARY WON'T INIT THE PARTNER
-            throw Null_partner_exception();
+        m_current_player = rotate_player(m_current_player, 1);
+
+        int players_with_cards = 0;
+        for (auto& player : m_players){
+            if (player.get_cards().empty()){
+                ++players_with_cards;
+            }
+        }
+        if (players_with_cards == 0){
+            if (!m_table.is_deck_empty()){
+                for (auto& player : m_players){
+                player.reset_state();
+                }
+                m_table.deal(m_players.begin(), m_players.end());
+
+                // set the player with the greatest combo, only it will get the bonus
+                // from his combo
+                for (auto& player : m_players){
+                    set_best_combo_player(player);
+                }
+
+                // in a new deal, last_placed is invalidated
+                m_table.reset_last_placed();
+
+                m_best_combo_player->increase_score(m_best_combo_player->get_combo());
+            }
+            else {
+                count_cards();
+                ret[State::Waiting_for_init] = true;
+            }
+        }
+        else if (players_with_cards == 1 && m_table.is_deck_empty()){
+            // winner_found = next_round(count_from_4);
+        }
+        if (m_table.get_laid_cards().empty()){
+            ret[State::Table_clear] = true;
+        }
+    }
+    else {
+        for (auto& player : m_players){
+            if (player.is_winner()){
+                ret[State::Winner_found] = true;
+            }
+        }
+
+        if (!(ret[State::Winner_found])){
+            for (auto& player : m_players){
+                player.reset_state();
+            }
+            m_dealer = rotate_player(m_dealer, 1);
+
+            m_table.set_deck(m_cards.begin(), m_cards.end());
+
+            m_table.shuffle_deck(m_random_engine);
+
+            if (int match_bonus = m_table.init_round(count_from_4); match_bonus > 0){
+                m_dealer->increase_score(match_bonus);
+            }
+            else {
+                rotate_player(m_dealer, 1)->increase_score(1);
+            }
+
+            m_current_player = rotate_player(m_dealer, 1);
+
+            m_best_combo_player = nullptr;
+            m_last_grab_player = nullptr;
+
+            m_table.deal(m_players.begin(), m_players.end());
+
+        }
+    }
+    return ret;
+}
+
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+void Game<Teamed, Card_type, Player_type, Table_type>::count_cards()
+{
+    constexpr int cards_per_deck = 40;
+    const bool three_players = (m_players.size() == 3);
+
+    for (auto& player : m_players){
+        // if the player isn't the dealer and the game has other than 3 players then do the usual sum
+        if (!(three_players && (player.id() == m_dealer->id()))){
+            player.count_cards(cards_per_deck / m_players.size());
+        }
+        else { // Count to 14, it is the dealer in a round of 3, so it should count 14 rather than 13, because rules
+            player.count_cards(14);
         }
     }
 }
 
+template<bool Teamed, class Card_type, class Player_type, class Table_type>
+void Game<Teamed, Card_type, Player_type, Table_type>::set_best_combo_player()
+{
+    for (auto& player : m_players){
+        if (m_best_combo_player){ // if not null/empty
+            if (player.get_combo() == m_best_combo_player->get_combo()){
+                // if they both share the same combo, the one with the
+                // greatest card gets the points
+                for (auto player_hand_it = player.get_hand().rbegin(), best_hand_it = m_best_combo_player->get_hand().rbegin();
+                     player_hand_it != player.get_hand().rend(); ++player_hand_it, ++best_hand_it){
+                    if (player_hand_it->value() > best_hand_it->value()){
+                        m_best_combo_player = &player;
+                        break;
+                    }
+                }
+            }
+            else if (player.get_combo() > m_best_combo_player->get_combo()){
+                m_best_combo_player = &player;
+            }
+        }
+        else {
+            m_best_combo_player = &player;
+        }
+    }
+
+}
+
+//} End of Game methods
 
 
-#endif // PLAYER_H_INCLUDED
+
+#endif // GAME_H_INCLUDED
