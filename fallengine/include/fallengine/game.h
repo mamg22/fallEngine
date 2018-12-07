@@ -14,10 +14,11 @@
 #include "table.h"
 #include "player.h"
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
+
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 class Game {
 public:
-    explicit Game(std::function<int()> random_engine, Combo max_combo_allowed = Combo::Registro)
+    explicit Game(Uniform_random_engine& random_engine, Combo max_combo_allowed = Combo::Registro)
         : m_random_engine(random_engine), m_max_combo_allowed(max_combo_allowed)
     {
         // fill cards from which table should copy
@@ -28,23 +29,20 @@ public:
                 m_cards.emplace_back(val, suit);
             }
         }
-        m_players.reserve(4);
     }
 
 
     virtual ~Game() = default;
 
-    enum class State {
-        Caida, // Player picked the card the previous player just placed, bonus points
-        Waiting_next_round, // No cards left in neither player's hands or table, new round should begin,
-        Table_clear, // Table cleared by player move, bonus points
-        Winner_found, // A winner has been found in this player's move, round begin (first deal) or round end (card count)
-        Last_deal, // This is the last deal of cards in the deck, Caida is disabled in last deal
-    };
 
-    // The game state should be indexed via enum class State members;
     using Game_state = std::array<bool, 5>;
-
+    /*
+        0 = Caida, // Player picked the card the previous player just placed, bonus points
+        1 = Waiting_next_round, // No cards left in neither player's hands or table, new round should begin,
+        2 = Table_clear, // Table cleared by player move, bonus points
+        3 = Winner_found, // A winner has been found in this player's move, round begin (first deal) or round end (card count)
+        4 = Last_deal, // This is the last deal of cards in the deck, Caida is disabled in last deal
+     */
     using Player_ptr = typename std::vector<Player_type>::iterator;
 
     bool init_game();
@@ -82,10 +80,19 @@ public:
         return m_players;
     }
 
+    const std::vector<Card_type>& get_table_cards() const
+    {
+        return m_table.get_table_cards();
+    }
+
 private:
-    auto rotate_player(Player_ptr player, int step) const;
+    auto rotate_player(Player_type* player, int step);
     void set_best_combo_player();
     void count_cards();
+    Player_type* to_player_ptr(auto iter)
+    {
+        return &(*iter);
+    }
 
     std::vector<Card_type> m_cards = {};
     Table_type m_table;
@@ -97,49 +104,49 @@ private:
     Player_type* m_best_combo_player = nullptr;
     Player_type* m_last_grab_player = nullptr;
 
-    std::function<int()> m_random_engine; // User must supply an random engine
+    Uniform_random_engine& m_random_engine; // User must supply an random engine
 
     bool m_is_playing = false;
 
-    Game_state m_last_game_state = {};
-
     int m_id_count = 0; // Counter for the player IDs
+
+    Game_state m_last_game_state = {};
 
     Combo m_max_combo_allowed = Combo::Registro;
 };
 
+
 //{ Game methods
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
-auto Game<Teamed, Card_type, Player_type, Table_type>::rotate_player(Player_ptr player, int step) const
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+auto Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::rotate_player(Player_type* player, int step)
 {
     if (step >= 0){
         while (step--){
-            if (++player == m_players.end()){
-                player = m_players.begin();
+            if (++player == to_player_ptr(m_players.end())){
+                player = to_player_ptr(m_players.begin());
             }
         }
     }
     else {
         while (step++){
-            if (--player == m_players.rend()){
-                player = m_players.rbegin();
+            if (--player == to_player_ptr(m_players.rend())){
+                player = to_player_ptr(m_players.rbegin());
             }
         }
     }
     return player;
 }
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
-void Game<Teamed, Card_type, Player_type, Table_type>::shuffle_players()
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::shuffle_players()
 {
     std::shuffle(m_players.begin(), m_players.end(), std::forward<decltype(m_random_engine)>(m_random_engine));
 }
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
-void Game<Teamed, Card_type, Player_type, Table_type>::order_players(int new_first_id)
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::order_players(int new_first_id)
 {
-    //TODO: Fix the swap calls, they don't compile, i'm still looking in what causes it, but it's about 250-500 lines of error in g++
     auto new_first = std::find_if(m_players.begin(), m_players.end(), [&](Player_type& player){
                                                                          return player.id() == new_first_id;
                                                                      });
@@ -147,14 +154,14 @@ void Game<Teamed, Card_type, Player_type, Table_type>::order_players(int new_fir
         std::rotate(m_players.begin(), new_first, m_players.end());
     }
     else { // teamed
-        std::swap(*m_players.begin(), *new_first);
-        std::swap(*(m_players.begin() + 2), new_first->get_partner());
+        swap(*m_players.begin(), *new_first);
+        swap(*(m_players.begin() + 2), new_first->get_partner());
     }
 
 }
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
-std::vector<std::reference_wrapper<Player_type>> Game<Teamed, Card_type, Player_type, Table_type>::find_winners() const
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+std::vector<std::reference_wrapper<Player_type>> Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::find_winners() const
 {
     std::vector<std::reference_wrapper<Player_type>> ret{};
     for (auto& player : m_players){
@@ -165,15 +172,15 @@ std::vector<std::reference_wrapper<Player_type>> Game<Teamed, Card_type, Player_
     return ret;
 }
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
-bool Game<Teamed, Card_type, Player_type, Table_type>::init_game()
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+bool Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::init_game()
 {
     constexpr int cards_in_deck_after_deal = 36;
     // only if is valid player count: 2+ players, and the remaining (36) cards are divided evenly between them
     if ((m_players.size() >= 2) && ((cards_in_deck_after_deal / m_players.size()) % 3 == 0)){
         m_table.set_deck(m_cards.begin(), m_cards.end());
         m_is_playing = true;
-        m_last_game_state[State::Waiting_next_round] = true;
+        m_last_game_state[1] = true;
         return true;
     }
     else {
@@ -181,15 +188,15 @@ bool Game<Teamed, Card_type, Player_type, Table_type>::init_game()
     }
 }
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 template<class... Args>
-void Game<Teamed, Card_type, Player_type, Table_type>::add_player(Args... args)
+void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::add_player(Args... args)
 {
     m_players.emplace_back(m_id_count++, m_table, m_max_combo_allowed, std::forward<Args>(args)...);
 }
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
-bool Game<Teamed, Card_type, Player_type, Table_type>::remove_player(int id)
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+bool Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::remove_player(int id)
 {
     if (auto player = std::find_if(m_players.begin(), m_players.end(), [&](Player_type& plyr){
                                                                            return id == plyr.id();
@@ -202,17 +209,17 @@ bool Game<Teamed, Card_type, Player_type, Table_type>::remove_player(int id)
     }
 }
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
-typename Game<Teamed, Card_type, Player_type, Table_type>::Game_state
-Game<Teamed, Card_type, Player_type, Table_type>::step(bool count_from_4)
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+typename Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::Game_state
+Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count_from_4)
 {
     Game_state ret{};
     constexpr int cards_per_deck = 40;
     // New code based on Game_state return
-    if (!(m_last_game_state[State::Waiting_next_round])){
+    if (!(m_last_game_state[1])){
         // play cards, branch if caida happened
         if (m_current_player->play_cards(!(m_table.is_deck_empty()))){
-            ret[State::Caida] = true;
+            ret[0] = true;
         }
         m_current_player = rotate_player(m_current_player, 1);
 
@@ -225,15 +232,13 @@ Game<Teamed, Card_type, Player_type, Table_type>::step(bool count_from_4)
         if (players_with_cards == 0){
             if (!m_table.is_deck_empty()){
                 for (auto& player : m_players){
-                player.reset_state();
+                    player.reset_state();
                 }
                 m_table.deal(m_players.begin(), m_players.end());
 
                 // set the player with the greatest combo, only it will get the bonus
                 // from his combo
-                for (auto& player : m_players){
-                    set_best_combo_player(player);
-                }
+                set_best_combo_player();
 
                 // in a new deal, last_placed is invalidated
                 m_table.reset_last_placed();
@@ -242,24 +247,24 @@ Game<Teamed, Card_type, Player_type, Table_type>::step(bool count_from_4)
             }
             else {
                 count_cards();
-                ret[State::Waiting_for_init] = true;
+                ret[1] = true;
             }
         }
         else if (players_with_cards == 1 && m_table.is_deck_empty()){
             // winner_found = next_round(count_from_4);
         }
-        if (m_table.get_laid_cards().empty()){
-            ret[State::Table_clear] = true;
+        if (m_table.get_table_cards().empty()){
+            ret[2] = true;
         }
     }
     else {
         for (auto& player : m_players){
             if (player.is_winner()){
-                ret[State::Winner_found] = true;
+                ret[3] = true;
             }
         }
 
-        if (!(ret[State::Winner_found])){
+        if (!(ret[3])){
             for (auto& player : m_players){
                 player.reset_state();
             }
@@ -267,7 +272,7 @@ Game<Teamed, Card_type, Player_type, Table_type>::step(bool count_from_4)
 
             m_table.set_deck(m_cards.begin(), m_cards.end());
 
-            m_table.shuffle_deck(m_random_engine);
+            m_table.shuffle_deck(std::forward<decltype(m_random_engine)>(m_random_engine));
 
             if (int match_bonus = m_table.init_round(count_from_4); match_bonus > 0){
                 m_dealer->increase_score(match_bonus);
@@ -288,8 +293,8 @@ Game<Teamed, Card_type, Player_type, Table_type>::step(bool count_from_4)
     return ret;
 }
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
-void Game<Teamed, Card_type, Player_type, Table_type>::count_cards()
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::count_cards()
 {
     constexpr int cards_per_deck = 40;
     const bool three_players = (m_players.size() == 3);
@@ -305,16 +310,16 @@ void Game<Teamed, Card_type, Player_type, Table_type>::count_cards()
     }
 }
 
-template<bool Teamed, class Card_type, class Player_type, class Table_type>
-void Game<Teamed, Card_type, Player_type, Table_type>::set_best_combo_player()
+template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::set_best_combo_player()
 {
     for (auto& player : m_players){
         if (m_best_combo_player){ // if not null/empty
             if (player.get_combo() == m_best_combo_player->get_combo()){
                 // if they both share the same combo, the one with the
                 // greatest card gets the points
-                for (auto player_hand_it = player.get_hand().rbegin(), best_hand_it = m_best_combo_player->get_hand().rbegin();
-                     player_hand_it != player.get_hand().rend(); ++player_hand_it, ++best_hand_it){
+                for (auto player_hand_it = player.get_cards().rbegin(), best_hand_it = m_best_combo_player->get_cards().rbegin();
+                     player_hand_it != player.get_cards().rend(); ++player_hand_it, ++best_hand_it){
                     if (player_hand_it->value() > best_hand_it->value()){
                         m_best_combo_player = &player;
                         break;
