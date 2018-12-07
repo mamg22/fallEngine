@@ -29,8 +29,10 @@ public:
         : m_current_table(current_table), m_hand(max_combo), m_id(id)
     {
     }
-
-    virtual ~Player() = default;
+    Player(Player<Teamed, Card_type>&& other) = default;
+    Player& operator=(Player<Teamed, Card_type>&& other) = default;
+    Player(Player<Teamed, Card_type>& other) = default;
+    Player& operator=(Player<Teamed, Card_type>& other) = default;
 
     std::vector<Card_type>& get_cards()
     {
@@ -75,6 +77,10 @@ public:
     void count_cards(int base);
 
     void increase_score(int increment);
+    void increase_score(Combo combo)
+    {
+        increase_score(static_cast<int>(combo));
+    }
 
 
     // Forwards to (member hand).set_cards, accepts a iterator pair of the deck
@@ -122,7 +128,7 @@ public:
         return m_id;
     }
 
-    Player<Teamed, Card_type>& get_partner() const
+    Player<Teamed, Card_type>& get_partner()
     {
         if constexpr (Teamed){
             if (m_partner){
@@ -133,27 +139,44 @@ public:
             }
         }
         else {
-            throw Null_partner_exception();
+            return *this;
         }
     }
 
+    friend void swap(Player<Teamed, Card_type>& lhs, Player<Teamed, Card_type>& rhs)
+    {
+        std::swap(lhs.m_score, rhs.m_score);
+        std::swap(lhs.m_cards_accumulated, rhs.m_cards_accumulated);
+        std::swap(lhs.m_id, rhs.m_id);
+        std::swap(lhs.m_partner, rhs.m_partner);
+    }
 protected:
     void increase_score_this_only(int increase)
     {
         m_score += increase;
     }
+    void increase_score_this_only(Combo combo)
+    {
+        m_score += static_cast<int>(combo);
+    }
 
 private:
-    Table<Card_type>& m_current_table;
-    std::deque<std::reference_wrapper<const Card_type>> m_selection = {};
+    std::reference_wrapper<Table<Card_type>> m_current_table;
+    std::deque<std::reference_wrapper<Card_type>> m_selection = {};
     Hand<Card_type> m_hand;
 
     int m_score = 0;
     int m_cards_accumulated = 0;
-    int m_id;
+    int m_id = 0;
 
     Player<Teamed, Card_type>* m_partner = nullptr;
 };
+
+template<bool Teamed, class Card_type>
+void swap(Player<Teamed, Card_type>&& a, Player<Teamed, Card_type>&& b)
+{
+    a.swap(b);
+}
 
 template<bool Teamed, class Card_type>
 template<class FWIterator>
@@ -212,7 +235,7 @@ bool Player<Teamed, Card_type>::play_cards(bool caida_enabled)
     auto select_beg = m_selection.begin();
     auto select_end = m_selection.end();
 
-    increase_score(m_current_table.play_cards(select_beg, select_end));
+    increase_score(m_current_table.get().play_cards(select_beg, select_end));
 
     if (m_selection.size() >= 2)
     {
@@ -224,18 +247,18 @@ bool Player<Teamed, Card_type>::play_cards(bool caida_enabled)
     // This checks for a "caida", where if the previous player placed a card
     // and this player takes it with his own card of the same value, then it
     // gives extra points
-    if (caida_enabled && (m_current_table.last_card_placed()) && (*(m_current_table.last_card_placed()) == *select_beg))
+    if (caida_enabled && (m_current_table.get().last_card_placed()) && (*(m_current_table.get().last_card_placed()) == select_beg->get()))
     {
         has_caida = true;
-        if ((1 <= *select_beg) && (*select_beg >= 7)){
+        if ((1 <= select_beg->get()) && (select_beg->get() >= 7)){
             increase_score(1);
         }
         else {
             // just for cards in range 10..12
-            increase_score(*select_beg.value() - 8);
+            increase_score(select_beg->get().value() - 8);
         }
     }
-    m_hand.erase(*select_beg);
+    m_hand.erase(select_beg->get());
     m_selection.clear();
     return has_caida;
 }
