@@ -34,7 +34,7 @@ public:
     Player(Player<Teamed, Card_type>& other) = default;
     Player& operator=(Player<Teamed, Card_type>& other) = default;
 
-    std::vector<Card_type>& get_cards()
+    const std::vector<Card_type>& get_cards() const
     {
         return m_hand.get_cards();
     }
@@ -234,6 +234,10 @@ bool Player<Teamed, Card_type>::play_cards(bool caida_enabled)
 {
     auto select_beg = m_selection.begin();
     auto select_end = m_selection.end();
+
+    if (select_beg == select_end){
+        return false;
+    }
 
     increase_score(m_current_table.get().play_cards(select_beg, select_end));
 
