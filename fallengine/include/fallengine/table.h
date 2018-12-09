@@ -7,6 +7,7 @@ class Table;
 #include <algorithm>
 #include <utility>
 #include <array>
+#include <cmath>
 
 #include "player.h"
 
@@ -120,7 +121,7 @@ int Table<Card_type>::play_cards(FWIterator begin, FWIterator end)
     }
     else if (cards_played == 1){
         m_table_cards.emplace_back(std::move(*begin));
-        m_last_card_placed = m_table_cards.end();
+        m_last_card_placed = &(*m_table_cards.end());
         return 0;
     }
     else {
@@ -189,38 +190,28 @@ void Table<Card_type>::reset_state()
 template<class Card_type>
 int Table<Card_type>::init_round(bool count_from_4)
 {
-
-
-
     // Idea for this to compile: instead of array, use a single int, if counting from 4, then set it to -4, else 1
     // when is required its value, pass it to abs() before
     // Also add an int to limit the increments up to 4 or just compare when it reaches a limit:
     // 0 when counting from 4, 5 if not
 
-    const std::array<int, 4> counts = {0, 0, 0, 0};
-    typename std::array<int, 4>::iterator count;
-    typename std::array<int, 4>::iterator end;
-
-    if (!count_from_4){
-        counts = {1, 2, 3, 4};
+    int bonus = 0;
+    if (count_from_4){
+        bonus = -4;
     }
     else {
-        counts = {4, 3, 2, 1};
+        bonus = 1;
     }
-
-    count = counts.begin();
-    end = counts.end();
-
     int match_bonus = 0;
 
     for (auto& card : m_deck){
-        if (count != end){
+        if (bonus != 0 || bonus != 5){
             if (std::find(m_table_cards.begin(), m_table_cards.end(), card) == m_table_cards.end())
             {
-                if (card == *count){
-                    match_bonus += *count;
+                if (card == bonus){
+                    match_bonus += std::abs(bonus);
                 }
-                ++count;
+                ++bonus;
                 m_table_cards.emplace_back(std::move(card));
             }
         }
