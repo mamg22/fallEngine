@@ -22,7 +22,6 @@ public:
         : m_random_engine(random_engine), m_max_combo_allowed(max_combo_allowed)
     {
         // fill cards from which table should copy
-        m_cards.reserve(40);
         for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
             for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas,
                                Suit::Oros}){
@@ -98,7 +97,7 @@ private:
     Table_type m_table;
     std::vector<Player_type> m_players = {};
 
-    // Various player pointers, required for basic game functionality
+    // Various player pointers, required for basic game functionality // don't jusge me
     Player_type* m_current_player = nullptr;
     Player_type* m_dealer = nullptr;
     Player_type* m_best_combo_player = nullptr;
@@ -178,9 +177,9 @@ bool Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::in
     constexpr int cards_in_deck_after_deal = 36;
     // only if is valid player count: 2+ players, and the remaining (36) cards are divided evenly between them
     if ((m_players.size() >= 2) && ((cards_in_deck_after_deal / m_players.size()) % 3 == 0)){
-        m_table.set_deck(m_cards.begin(), m_cards.end());
         m_is_playing = true;
-        m_last_game_state[1] = true;
+        m_dealer = to_player_ptr(m_players.end());
+        m_current_player = rotate_player(m_dealer, 1);
         return true;
     }
     else {
@@ -214,7 +213,6 @@ typename Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>
 Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count_from_4)
 {
     Game_state ret{};
-    constexpr int cards_per_deck = 40;
     // New code based on Game_state return
     if (!(m_last_game_state[1])){
         // play cards, branch if caida happened
@@ -225,7 +223,7 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
 
         int players_with_cards = 0;
         for (auto& player : m_players){
-            if (player.get_cards().empty()){
+            if (!player.get_cards().empty()){
                 ++players_with_cards;
             }
         }
@@ -261,6 +259,7 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
         for (auto& player : m_players){
             if (player.is_winner()){
                 ret[3] = true;
+                break; // No longer need to loop
             }
         }
 
@@ -286,10 +285,10 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
             m_best_combo_player = nullptr;
             m_last_grab_player = nullptr;
 
-            m_table.deal(m_players.begin(), m_players.end());
-
         }
+        ret[1] = false;
     }
+    m_last_game_state = ret;
     return ret;
 }
 
