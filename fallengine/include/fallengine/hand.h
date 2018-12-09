@@ -110,7 +110,9 @@ void Hand<Card_type>::set_cards(FWIterator begin, FWIterator end)
 template<class Card_type>
 bool Hand<Card_type>::erase(Card& card)
 {
-    if (auto item = std::find_if(m_cards.begin(), m_cards.end(), is_same_card);
+    if (auto item = std::find_if(m_cards.begin(), m_cards.end(), [&](Card& other_card){
+                                                                     return is_same_card(card, other_card);
+                                                                 }
         item != m_cards.end())
     {
         m_cards.erase(item);
@@ -133,7 +135,7 @@ void Hand<Card_type>::analize_hand()
 
     // Because is sorted, this will always be the highest
 
-    m_highest_card = m_cards[2];
+    m_highest_card = m_cards[2].value();
 
     // Check if extra combos are allowed
     if (m_max_combo_allowed == Combo::Casa_grande) {
