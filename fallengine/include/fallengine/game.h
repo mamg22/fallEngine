@@ -21,10 +21,10 @@ public:
     explicit Game(Uniform_random_engine& random_engine, Combo max_combo_allowed = Combo::Registro)
         : m_random_engine(random_engine), m_max_combo_allowed(max_combo_allowed)
     {
+        m_cards.reserve(41);
         // fill cards from which table should copy
         for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
-            for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas,
-                               Suit::Oros}){
+            for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas, Suit::Oros}){
                 m_cards.emplace_back(val, suit);
             }
         }
@@ -43,6 +43,7 @@ public:
         4 = Last_deal, // This is the last deal of cards in the deck, Caida is disabled in last deal
      */
     using Player_ptr = typename std::vector<Player_type>::iterator;
+    using Reverse_player_ptr = typename std::vector<Player_type>::reverse_iterator;
 
     bool init_game();
 
@@ -88,14 +89,18 @@ private:
     auto rotate_player(Player_type* player, int step);
     void set_best_combo_player();
     void count_cards();
-    Player_type* to_player_ptr(auto iter)
+    Player_type* to_player_ptr(Player_ptr iter)
     {
         return &(*iter);
     }
+    Player_type* to_player_ptr(Reverse_player_ptr r_iter)
+    {
+        return &(*r_iter);
+    }
 
-    std::vector<Card_type> m_cards = {};
+    std::vector<Card_type> m_cards;
     Table_type m_table;
-    std::vector<Player_type> m_players = {};
+    std::vector<Player_type> m_players;
 
     // Various player pointers, required for basic game functionality // don't jusge me
     Player_type* m_current_player = nullptr;
@@ -112,6 +117,8 @@ private:
     Game_state m_last_game_state = {};
 
     Combo m_max_combo_allowed = Combo::Registro;
+
+    bool m_just_inited = false;
 };
 
 
@@ -176,10 +183,14 @@ bool Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::in
 {
     constexpr int cards_in_deck_after_deal = 36;
     // only if is valid player count: 2+ players, and the remaining (36) cards are divided evenly between them
-    if ((m_players.size() >= 2) && ((cards_in_deck_after_deal / m_players.size()) % 3 == 0)){
+    // or in two Teams of two players each
+    if (  (Teamed && m_players.size() == 4)
+       || (!Teamed && m_players.size() >= 2 && ((cards_in_deck_after_deal / m_players.size()) % 3 == 0))){
         m_is_playing = true;
-        m_dealer = to_player_ptr(m_players.end());
+        m_just_inited = true;
+        m_dealer = to_player_ptr(m_players.begin());
         m_current_player = rotate_player(m_dealer, 1);
+        m_last_game_state[1] = true;
         return true;
     }
     else {
@@ -212,8 +223,7 @@ template<bool Teamed, class Card_type, class Player_type, class Table_type, clas
 typename Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::Game_state
 Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count_from_4)
 {
-    Game_state ret{};
-    // New code based on Game_state return
+    Game_state ret;
     if (!(m_last_game_state[1])){
         // play cards, branch if caida happened
         if (m_current_player->play_cards(!(m_table.is_deck_empty()))){
@@ -267,9 +277,16 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
             for (auto& player : m_players){
                 player.reset_state();
             }
-            m_dealer = rotate_player(m_dealer, 1);
+            if (!m_just_inited){
+                m_dealer = rotate_player(m_dealer, 1);
+                m_current_player = rotate_player(m_dealer, 1);
+            }
+            else {
+                m_just_inited = false;
+            }
 
             m_table.set_deck(m_cards.begin(), m_cards.end());
+
 
             m_table.shuffle_deck(std::forward<decltype(m_random_engine)>(m_random_engine));
 
@@ -280,7 +297,8 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
                 rotate_player(m_dealer, 1)->increase_score(1);
             }
 
-            m_current_player = rotate_player(m_dealer, 1);
+
+            m_table.deal(m_players.begin(), m_players.end());
 
             m_best_combo_player = nullptr;
             m_last_grab_player = nullptr;
