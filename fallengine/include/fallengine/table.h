@@ -17,9 +17,8 @@ public:
 
     Table()
     {
-        m_deck.reserve(40);
+        m_deck.reserve(41);
         m_table_cards.reserve(12);
-
     }
 
     template<class UniformRandomGen>
@@ -82,8 +81,8 @@ public:
 
 private:
     Card_type* m_last_card_placed = nullptr;
-    std::vector<Card_type> m_deck = {};
-    std::vector<Card_type> m_table_cards = {};
+    std::vector<Card_type> m_deck;
+    std::vector<Card_type> m_table_cards;
 };
 
 template<class Card_type>
@@ -133,7 +132,7 @@ template<class Card_type>
 template <class Iterator>
 void Table<Card_type>::set_deck(Iterator begin, Iterator end)
 {
-    m_deck.reserve(40);
+    m_deck.reserve(50);
     std::copy(begin, end, m_deck.begin());
 }
 
@@ -165,7 +164,7 @@ bool Table<Card_type>::take_card(Card_type& card)
 template<class Card_type>
 bool Table<Card_type>::place_card(Card_type& card)
 {
-    if (auto card_found = std::find_if(m_table_cards.begin(), m_table_cards.end(), [&card](Card_type& laid_card){
+    if (auto card_found = std::find(m_table_cards.begin(), m_table_cards.end(), [&card](Card_type& laid_card){
                                                                                      return is_same_card(card, laid_card);
                                                                                  });
         card_found == m_table_cards.end())
@@ -190,29 +189,23 @@ void Table<Card_type>::reset_state()
 template<class Card_type>
 int Table<Card_type>::init_round(bool count_from_4)
 {
-    // Idea for this to compile: instead of array, use a single int, if counting from 4, then set it to -4, else 1
-    // when is required its value, pass it to abs() before
-    // Also add an int to limit the increments up to 4 or just compare when it reaches a limit:
-    // 0 when counting from 4, 5 if not
-
-    int bonus = 0;
+    int bonus = 1;
     if (count_from_4){
         bonus = -4;
     }
-    else {
-        bonus = 1;
-    }
+
     int match_bonus = 0;
 
     for (auto& card : m_deck){
         if (bonus != 0 || bonus != 5){
             if (std::find(m_table_cards.begin(), m_table_cards.end(), card) == m_table_cards.end())
             {
-                if (card == bonus){
+                if (card == std::abs(bonus)){
                     match_bonus += std::abs(bonus);
                 }
                 ++bonus;
                 m_table_cards.emplace_back(std::move(card));
+                m_deck.erase(std::find(m_deck.begin(), m_deck.end(), card));
             }
         }
         else {
