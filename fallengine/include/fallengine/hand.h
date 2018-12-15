@@ -30,13 +30,16 @@ template<class Card_type>
 class Hand {
 public:
 
-    Hand() = default;
-    Hand(Combo max_combo_allowed)
+    Hand(Combo max_combo_allowed = Combo::Registro)
     : m_max_combo_allowed(max_combo_allowed)
     {
         m_cards.reserve(3);
     }
 
+    Hand<Card_type>& operator=(Hand<Card_type>&& other) = default;
+    Hand(Hand<Card_type>& other) = default;
+    Hand<Card_type>& operator=(Hand<Card_type>& other) = default;
+    Hand(Hand<Card_type>&& other) = default;
     // Takes a iterator pair to the cards in the deck to be set here, an calls
     // analize_hand at the end
     template<class FWIterator>
@@ -95,7 +98,7 @@ private:
     Combo m_combo = Combo::None;
     int m_highest_card = 1;
     std::string m_combo_name = "";
-    const Combo m_max_combo_allowed = Combo::Registro;
+    Combo m_max_combo_allowed = Combo::Registro;
 };
 
 template<class Card_type>
@@ -111,8 +114,7 @@ template<class Card_type>
 bool Hand<Card_type>::erase(Card& card)
 {
     if (auto item = std::find_if(m_cards.begin(), m_cards.end(), [&](Card& other_card){
-                                                                     return is_same_card(card, other_card);
-                                                                 }
+                                                                     return is_same_card(card, other_card);});
         item != m_cards.end())
     {
         m_cards.erase(item);
