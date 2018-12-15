@@ -162,7 +162,7 @@ protected:
 
 private:
     std::reference_wrapper<Table<Card_type>> m_current_table;
-    std::deque<std::reference_wrapper<Card_type>> m_selection = {};
+    std::deque<std::reference_wrapper<Card_type>> m_selection;
     Hand<Card_type> m_hand;
 
     int m_score = 0;
