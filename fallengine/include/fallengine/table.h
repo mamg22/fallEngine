@@ -8,6 +8,7 @@ class Table;
 #include <utility>
 #include <array>
 #include <cmath>
+#include <iostream>
 
 #include "player.h"
 
@@ -74,7 +75,7 @@ public:
     template <class Iterator>
     void set_deck(Iterator begin, Iterator end);
 
-    const std::vector<Card_type>& get_table_cards() const
+    std::vector<Card_type>& get_table_cards()
     {
         return m_table_cards;
     }
@@ -119,7 +120,7 @@ int Table<Card_type>::play_cards(FWIterator begin, FWIterator end)
         }
     }
     else if (cards_played == 1){
-        m_table_cards.emplace_back(std::move(*begin));
+        m_table_cards.push_back(std::move(*begin));
         m_last_card_placed = &(*m_table_cards.end());
         return 0;
     }
@@ -132,8 +133,9 @@ template<class Card_type>
 template <class Iterator>
 void Table<Card_type>::set_deck(Iterator begin, Iterator end)
 {
-    m_deck.reserve(50);
-    std::copy(begin, end, m_deck.begin());
+    // okay, we made some progress here, at least it copies it, but it still doesn't deal properly
+    m_deck.assign(begin, end);
+    std::cout << "d-size:" << m_deck.size() <<'\n';
 }
 
 template<class Card_type>
@@ -189,13 +191,51 @@ void Table<Card_type>::reset_state()
 template<class Card_type>
 int Table<Card_type>::init_round(bool count_from_4)
 {
-    int bonus = 1;
-    if (count_from_4){
-        bonus = -4;
-    }
+    m_table_cards.clear();
 
     int match_bonus = 0;
 
+    int bonus = count_from_4 ? 4 : 1;
+    int bonus_end = count_from_4 ? 0 : 5;
+
+    for (auto& card : m_deck){
+        if (bonus == bonus_end){
+            break;
+        }
+        if (std::find(m_table_cards.begin(), m_table_cards.end(), card) == m_table_cards.end()){
+            if (card == bonus){
+                match_bonus += bonus;
+            }
+            m_table_cards.push_back(std::move(card));
+            m_deck.erase(std::find_if(m_deck.begin(), m_deck.end(), [&](auto& comp_card){
+                                                                        return is_same_card(card, comp_card);
+                                                                    }));
+            ++bonus;
+        }
+    }
+
+    return match_bonus;
+    // Kept here for comparison: simpler code (up) is better than spaghetti code (down)
+    /*
+    for (int bonus = count_from_4 ? 4 : 1; count_from_4 ? bonus > 0 : bonus < 5; count_from_4 ? bonus-- : bonus++){
+        std::cout << bonus;
+        if (!(begin == end)){
+            if (std::find(m_table_cards.begin(), m_table_cards.end(), *begin) == m_table_cards.end()){
+                if (*begin == bonus){
+                    match_bonus += bonus;
+                }
+                m_table_cards.push_back(std::move(*begin));
+                m_deck.erase(begin);
+            }
+            ++begin;
+        }
+        else {
+            std::cout << '?' << bonus << '?';
+            break;
+        }
+    }
+
+    // Todo: rewrite this to use manual iteration, because this is kinda messy, and maybe buggy
     for (auto& card : m_deck){
         if (bonus != 0 || bonus != 5){
             if (std::find(m_table_cards.begin(), m_table_cards.end(), card) == m_table_cards.end())
@@ -204,7 +244,7 @@ int Table<Card_type>::init_round(bool count_from_4)
                     match_bonus += std::abs(bonus);
                 }
                 ++bonus;
-                m_table_cards.emplace_back(std::move(card));
+                m_table_cards.push_back(std::move(card));
                 m_deck.erase(std::find(m_deck.begin(), m_deck.end(), card));
             }
         }
@@ -212,7 +252,8 @@ int Table<Card_type>::init_round(bool count_from_4)
             break;
         }
     }
-    return match_bonus;
+    */
+
 }
 
 template<class Card_type>
