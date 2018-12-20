@@ -34,7 +34,7 @@ public:
     Player(Player<Teamed, Card_type>& other) = default;
     Player& operator=(Player<Teamed, Card_type>& other) = default;
 
-    const std::vector<Card_type>& get_cards() const
+    std::vector<Card_type>& get_cards()
     {
         return m_hand.get_cards();
     }
@@ -54,13 +54,13 @@ public:
     {
         m_selection.clear();
     }
-    const Card_type& next_selection() const // First card selected
+    Card_type& next_selection() const // First card selected
     {
-        return *m_selection.front();
+        return m_selection.front();
     }
-    const Card_type& last_selection() const // Last card selected
+    Card_type& last_selection() const // Last card selected
     {
-        return *m_selection.back();
+        return m_selection.back();
     }
     const std::deque<std::reference_wrapper<const Card_type>>& get_selection() const
     {
@@ -143,7 +143,7 @@ public:
         }
     }
 
-    friend void swap(Player<Teamed, Card_type>& lhs, Player<Teamed, Card_type>& rhs)
+    virtual void swap(Player<Teamed, Card_type>& lhs, Player<Teamed, Card_type>& rhs)
     {
         std::swap(lhs.m_score, rhs.m_score);
         std::swap(lhs.m_cards_accumulated, rhs.m_cards_accumulated);
@@ -194,7 +194,9 @@ bool Player<Teamed, Card_type>::select(Card_type& card)
     auto hand_end = m_hand.get_cards().end();
 
     // bool in_hand = (find_same_card(card, hand_begin, hand_end)== hand_end);
-    bool in_hand = (std::find_if(hand_begin, hand_end, is_same_card) != hand_end);
+    bool in_hand = (std::find_if(hand_begin, hand_end, [&](Card& other){
+                                                           return is_same_card(card, other);
+                                                       }) != hand_end);
     // Only add if:
     // first card selected AND own hand only
     // second card selected AND same value as last selected AND not in hand
