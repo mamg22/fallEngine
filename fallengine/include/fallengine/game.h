@@ -9,6 +9,7 @@
 #include <numeric>
 #include <functional>
 #include <array>
+#include <iostream>
 
 #include "card.h"
 #include "table.h"
@@ -21,13 +22,13 @@ public:
     explicit Game(Uniform_random_engine& random_engine, Combo max_combo_allowed = Combo::Registro)
         : m_random_engine(random_engine), m_max_combo_allowed(max_combo_allowed)
     {
-        m_cards.reserve(41);
         // fill cards from which table should copy
         for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
             for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas, Suit::Oros}){
-                m_cards.emplace_back(val, suit);
+                m_cards.push_back(Card_type(val, suit));
             }
         }
+        std::cout << "g-cards-size:" << m_cards.size() << '\n';
     }
 
 
@@ -60,7 +61,7 @@ public:
 
     void shuffle_players();
 
-    Player_type& current_player() const
+    Player_type& current_player()
     {
         return *m_current_player;
     }
@@ -75,12 +76,12 @@ public:
         return *m_best_combo_player;
     }
 
-    const std::vector<Player_type>& get_players() const
+    std::vector<Player_type>& get_players()
     {
         return m_players;
     }
 
-    const std::vector<Card_type>& get_table_cards() const
+    std::vector<Card_type>& get_table_cards()
     {
         return m_table.get_table_cards();
     }
@@ -300,7 +301,7 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
 
             m_table.deal(m_players.begin(), m_players.end());
 
-            m_best_combo_player = nullptr;
+            set_best_combo_player();
             m_last_grab_player = nullptr;
 
         }
