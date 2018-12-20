@@ -50,8 +50,6 @@ public:
 
     // Returns a referente to the member cards to provide better access
 
-    // This overload exists because otherwise, it wouldn't compile
-    // because of some error at "util.h", JUST FOR THAT (for now)
     std::vector<Card_type>& get_cards()
     {
         return m_cards;
@@ -94,7 +92,7 @@ private:
     // combo, highest_cards and combo_name
     void analize_hand();
 
-    std::vector<Card_type> m_cards{};
+    std::vector<Card_type> m_cards;
     Combo m_combo = Combo::None;
     int m_highest_card = 1;
     std::string m_combo_name = "";
@@ -105,8 +103,12 @@ template<class Card_type>
 template<class FWIterator>
 void Hand<Card_type>::set_cards(FWIterator begin, FWIterator end)
 {
-    // Push each card in range to member cards
-    std::move(begin, end, m_cards.begin());
+    for (;begin != end; begin++){
+        m_cards.push_back(*begin);
+    }
+    //m_cards.reserve(3);
+    //std::copy(begin, end, m_cards.begin()); // FAIL
+    //m_cards.assign(begin, end); // FAIL
     analize_hand();
 }
 
