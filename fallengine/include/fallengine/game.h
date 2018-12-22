@@ -34,15 +34,14 @@ public:
 
     virtual ~Game() = default;
 
+    struct State {
+        bool caida = false; // Player picked the card the previous player just placed, bonus points
+        bool waiting_next_round = false; // No cards left in neither player's hands or table, new round should begin,
+        bool table_clear = false;  // Table cleared by player move, bonus points
+        bool winner_found = false;  // A winner has been found in this player's move, round begin (first deal) or round end (card count)
+        bool last_deal = false; // This is the last deal of cards in the deck, Caida is disabled in last deal
+    };
 
-    using Game_state = std::array<bool, 5>;
-    /*
-        0 = Caida, // Player picked the card the previous player just placed, bonus points
-        1 = Waiting_next_round, // No cards left in neither player's hands or table, new round should begin,
-        2 = Table_clear, // Table cleared by player move, bonus points
-        3 = Winner_found, // A winner has been found in this player's move, round begin (first deal) or round end (card count)
-        4 = Last_deal, // This is the last deal of cards in the deck, Caida is disabled in last deal
-     */
     using Player_ptr = typename std::vector<Player_type>::iterator;
     using Reverse_player_ptr = typename std::vector<Player_type>::reverse_iterator;
 
@@ -53,7 +52,7 @@ public:
 
     bool remove_player(int id);
 
-    Game_state step(bool count_from_4 = false); // count_from_4 only used when Waiting_next_round was returned before
+    State step(bool count_from_4 = false); // count_from_4 only used when Waiting_next_round was returned before
 
     std::vector<std::reference_wrapper<Player_type>> find_winners() const;
 
@@ -71,7 +70,7 @@ public:
         return *m_dealer;
     }
 
-    Player_type& player_with_best_combo() const
+    Player_type& best_combo_p() const
     {
         return *m_best_combo_player;
     }
@@ -115,7 +114,7 @@ private:
 
     int m_id_count = 0; // Counter for the player IDs
 
-    Game_state m_last_game_state = {};
+    State m_last_game_state = {};
 
     Combo m_max_combo_allowed = Combo::Registro;
 
@@ -191,7 +190,7 @@ bool Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::in
         m_just_inited = true;
         m_dealer = to_player_ptr(m_players.begin());
         m_current_player = rotate_player(m_dealer, 1);
-        m_last_game_state[1] = true;
+        m_last_game_state.waiting_next_round = true;
         return true;
     }
     else {
@@ -221,16 +220,20 @@ bool Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::re
 }
 
 template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-typename Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::Game_state
+typename Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::State
 Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count_from_4)
 {
-    Game_state ret;
-    if (!(m_last_game_state[1])){
+    State ret;
+    if (!(m_last_game_state.waiting_next_round)){
         // play cards, branch if caida happened
-        if (m_current_player->play_cards(!(m_table.is_deck_empty()))){
-            ret[0] = true;
+
+        auto[caida, valid] = m_current_player->play_cards(!(m_table.is_deck_empty()));
+
+        ret.caida = caida;
+        if (valid){
+            m_current_player = rotate_player(m_current_player, 1);
         }
-        m_current_player = rotate_player(m_current_player, 1);
+
 
         int players_with_cards = 0;
         for (auto& player : m_players){
@@ -256,25 +259,25 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
             }
             else {
                 count_cards();
-                ret[1] = true;
+                ret.waiting_next_round = true;
             }
         }
         else if (players_with_cards == 1 && m_table.is_deck_empty()){
             // winner_found = next_round(count_from_4);
         }
         if (m_table.get_table_cards().empty()){
-            ret[2] = true;
+            ret.table_clear = true;
         }
     }
     else {
         for (auto& player : m_players){
             if (player.is_winner()){
-                ret[3] = true;
+                ret.winner_found = true;
                 break; // No longer need to loop
             }
         }
 
-        if (!(ret[3])){
+        if (!(ret.winner_found)){
             for (auto& player : m_players){
                 player.reset_state();
             }
@@ -305,7 +308,7 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
             m_last_grab_player = nullptr;
 
         }
-        ret[1] = false;
+        ret.waiting_next_round = false;
     }
     m_last_game_state = ret;
     return ret;
@@ -331,11 +334,62 @@ void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::co
 template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::set_best_combo_player()
 {
+    // TODO: Fix some bugs:
+    //
+    // Edge case for when combo is Ronda, which the below code might cause that if a player has a pair of 2, but
+    // a card of 12, it qualifies better than a player with a pair of 3 but a card of 5
+    // ^~ FIXED maybe evaluate using the middle card (always belongs to the pair) and then if both are the same, then continue the
+    //    execution as usual, else just fall into a continue and only set the best player if it is greater than it;
+    //
+    // fix that if two players have the same combo, and exactly the same hand, then the one closer to the dealer gets it
+    // ^~ maybe iterate starting from (dealer-1) to (dealer) instead of the order in the vector
+
+    for (auto current = rotate_player(m_dealer, -1);; current = rotate_player(current, -1)){
+        auto& player = *current;
+        std::cout << "Setting best combo for " << player.id() << '\n';
+        if (m_best_combo_player){ // if not null/empty
+            if (player.get_combo() == m_best_combo_player->get_combo()){
+
+                if (player.get_combo() == Combo::Ronda || player.get_combo() == Combo::Ronda_10 ||
+                    player.get_combo() == Combo::Ronda_11 || player.get_combo() == Combo::Ronda_12){
+                    if (player.get_cards()[1] > m_best_combo_player->get_cards()[1]){
+                        m_best_combo_player = &player;
+                        continue;
+                    }
+                }
+                // if they both share the same combo, the one with the greatest card gets the points
+                for (auto player_hand_it = player.get_cards().rbegin(), best_hand_it = m_best_combo_player->get_cards().rbegin();
+                     player_hand_it != player.get_cards().rend(); ++player_hand_it, ++best_hand_it){
+                    if (player_hand_it->value() > best_hand_it->value()){
+                        m_best_combo_player = &player;
+                        break;
+                    }
+                }
+            }
+            else if (player.get_combo() > m_best_combo_player->get_combo()){
+                m_best_combo_player = &player;
+            }
+        }
+        else {
+            m_best_combo_player = &player;
+        }
+        if (current == m_dealer){
+            break;
+        }
+    }
+    /*
     for (auto& player : m_players){
         if (m_best_combo_player){ // if not null/empty
             if (player.get_combo() == m_best_combo_player->get_combo()){
-                // if they both share the same combo, the one with the
-                // greatest card gets the points
+
+                if (player.get_combo() == Combo::Ronda || player.get_combo() == Combo::Ronda_10 ||
+                    player.get_combo() == Combo::Ronda_11 || player.get_combo() == Combo::Ronda_12){
+                    if (player.get_cards()[1] > m_best_combo_player->get_cards()[1]){
+                        m_best_combo_player = &player;
+                        continue;
+                    }
+                }
+                // if they both share the same combo, the one with the greatest card gets the points
                 for (auto player_hand_it = player.get_cards().rbegin(), best_hand_it = m_best_combo_player->get_cards().rbegin();
                      player_hand_it != player.get_cards().rend(); ++player_hand_it, ++best_hand_it){
                     if (player_hand_it->value() > best_hand_it->value()){
@@ -352,7 +406,7 @@ void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::se
             m_best_combo_player = &player;
         }
     }
-
+    */
 }
 
 //} End of Game methods
