@@ -236,6 +236,7 @@ int Table<Card_type>::init_round(bool count_from_4)
     }
 
     // Todo: rewrite this to use manual iteration, because this is kinda messy, and maybe buggy
+    /*
     for (auto& card : m_deck){
         if (bonus != 0 || bonus != 5){
             if (std::find(m_table_cards.begin(), m_table_cards.end(), card) == m_table_cards.end())
