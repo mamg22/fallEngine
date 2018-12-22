@@ -7,6 +7,7 @@
 #include <functional>
 #include <algorithm>
 #include <exception>
+#include <utility>
 
 template<bool Teamed, class Card_type>
 class Player;
@@ -70,7 +71,11 @@ public:
     // Plays the current selection, true if (special move) "caida" has happened,
     // else false
     // with_caida shall be false if the deck is empty, hence end of round
-    bool play_cards(bool caida_enabled = true);
+    // Plays the current selection, returns:
+    // First: true if special move "caida" happened, else false
+    // Second: false if the played cards weren't valid (e.g. no cards selected,
+    //         or selected a own card that is on the table, but didn't select the other, else true
+    std::pair<bool, bool> play_cards(bool caida_enabled = true);
 
     void reset_state();
 
@@ -232,13 +237,20 @@ void Player<Teamed, Card_type>::count_cards(int base)
 }
 
 template<bool Teamed, class Card_type>
-bool Player<Teamed, Card_type>::play_cards(bool caida_enabled)
+std::pair<bool, bool> Player<Teamed, Card_type>::play_cards(bool caida_enabled)
 {
     auto select_beg = m_selection.begin();
     auto select_end = m_selection.end();
 
+    auto& table_cards = m_current_table.get().get_table_cards();
+
+    // Don't play if just selected one (own) card, but its already on the table
+    if (m_selection.size() == 1 && std::find(table_cards.begin(), table_cards.end(), *select_beg) != table_cards.end()){
+        return {false, false};
+    }
+
     if (select_beg == select_end){
-        return false;
+        return {false, false};
     }
 
     increase_score(m_current_table.get().play_cards(select_beg, select_end));
@@ -266,7 +278,7 @@ bool Player<Teamed, Card_type>::play_cards(bool caida_enabled)
     }
     m_hand.erase(select_beg->get());
     m_selection.clear();
-    return has_caida;
+    return {has_caida, true};
 }
 
 template<bool Teamed, class Card_type>
