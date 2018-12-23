@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <array>
 
 #include "card.h"
 
@@ -31,9 +32,14 @@ class Hand {
 public:
 
     Hand(Combo max_combo_allowed = Combo::Registro)
-    : m_max_combo_allowed(max_combo_allowed)
     {
-        m_cards.reserve(3);
+        // Allow combos below and including the specified
+        std::fill_n(m_allowed_combos.begin(), static_cast<int>(max_combo_allowed), true);
+    }
+
+    explicit Hand(std::array<bool, 12> allowed_combos)
+    : m_allowed_combos(allowed_combos)
+    {
     }
 
     Hand<Card_type>& operator=(Hand<Card_type>&& other) = default;
@@ -91,12 +97,13 @@ private:
     // Private method that is for especific use by set_cards, sets members
     // combo, highest_cards and combo_name
     void analize_hand();
+    bool is_allowed(Combo combo);
 
     std::vector<Card_type> m_cards;
     Combo m_combo = Combo::None;
     int m_highest_card = 1;
     std::string m_combo_name = "";
-    Combo m_max_combo_allowed = Combo::Registro;
+    std::array<bool, 12 /*number of combos*/> m_allowed_combos;
 };
 
 template<class Card_type>
@@ -110,6 +117,12 @@ void Hand<Card_type>::set_cards(FWIterator begin, FWIterator end)
     //std::copy(begin, end, m_cards.begin()); // FAIL
     //m_cards.assign(begin, end); // FAIL
     analize_hand();
+}
+
+template<class Card_type>
+bool Hand<Card_type>::is_allowed(Combo combo)
+{
+    return m_allowed_combos[static_cast<int>(combo) - 1];
 }
 
 template<class Card_type>
@@ -141,111 +154,93 @@ void Hand<Card_type>::analize_hand()
 
     m_highest_card = m_cards[2].value();
 
-    // Check if extra combos are allowed
-    if (m_max_combo_allowed == Combo::Casa_grande) {
-        // Check if has a one as lowest card, else don't check
-        if (card_1 == 1){
-            // Check for Casa Grande (1, 12, 12)
-            if (card_2 == 12 && card_3 == 12){
-                m_combo = Combo::Casa_grande;
-                m_combo_name = "Casa Grande";
-                return;
-            }
-            // Check for Casa Chica (1, 11, 11)
-            if (card_2 == 11 && card_3 == 11){
-                m_combo = Combo::Casa_chica;
-                m_combo_name = "Casa Chica";
-                return;
-            }
-            // Check for Registrico (1, 10, 11)
-            if (card_2 == 10 && card_3 == 11){
-                m_combo = Combo::Registrico;
-                m_combo_name = "Registrico";
-                return;
-            }
-            // Check for Maguaro (1, 10, 12)
-            if (card_2 == 10 && card_3 == 12){
-                m_combo = Combo::Maguaro;
-                m_combo_name = "Maguaro";
-                return;
-            }
+    // Check for Casa Grande (1, 12, 12)
+    if (is_allowed(Combo::Casa_grande) && card_1 == 1 && card_2 == 12 && card_3 == 12){
+        m_combo = Combo::Casa_grande;
+        m_combo_name = "Casa Grande";
+        return;
+    }
+    // Check for Casa Chica (1, 11, 11)
+    else if (is_allowed(Combo::Casa_chica) && card_1 == 1 && card_2 == 11 && card_3 == 11){
+        m_combo = Combo::Casa_chica;
+        m_combo_name = "Casa Chica";
+        return;
+    }
+    // Check for Registrico (1, 10, 11)
+    else if (is_allowed(Combo::Registrico) && card_1 == 1 && card_2 == 10 && card_3 == 11){
+        m_combo = Combo::Registrico;
+        m_combo_name = "Registrico";
+        return;
+    }
+    // Check for Maguaro (1, 10, 12)
+    else if (is_allowed(Combo::Maguaro) && card_1 == 1 && card_2 == 10 && card_3 == 12){
+        m_combo = Combo::Maguaro;
+        m_combo_name = "Maguaro";
+        return;
+    }
+    // Check for Registro (1, 11, 12)
+    else if (is_allowed(Combo::Registro) && card_1 == 1 && card_2 == 11 && card_3 == 12){
+        m_combo = Combo::Registro;
+        m_combo_name = "Registro";
+        return;
+    }
+    // Check for Vigia ( X, X, {X+1}) or ( X, {X+1}, {X+1})
+    else if (is_allowed(Combo::Vigia) && (  (card_1 == card_2 && card_3 == card_1 + 1)
+                                         || (card_2 == card_3 && card_1 + 1 == card_2) )){
+        m_combo = Combo::Vigia;
+        m_combo_name = "Vigia";
+        return;
+    }
+    // Check for Partrulla ( X, {X+1}, {X+2} )
+    else if (is_allowed(Combo::Patrulla) && (card_1 + 1 == card_2 && card_1 + 2 == card_3))
+    {
+        m_combo = Combo::Patrulla;
+        m_combo_name = "Patrulla";
+        return;
+    }
+    // Check for Trivilin ( X, X, X )
+    else if (is_allowed(Combo::Trivilin) && card_1 == card_2 && card_2 == card_3)
+    {
+        m_combo = Combo::Trivilin;
+        m_combo_name = "Trivilin";
+        return;
+    }
+
+    // Check for Ronda... ( X, X, *) or ( *, X, X)
+    else if (card_1 == card_2 || card_2 == card_3) {
+        // The following checks only check the value of the second card
+        // because if a pair exists the middle card will always be one of it
+
+        if (is_allowed(Combo::Ronda_12) && card_2.value == 12){
+            // Ronda_12 (pair of 12)
+            m_combo = Combo::Ronda_12;
+            m_combo_name = "Ronda (12)";
+            return;
+        }
+        else if (is_allowed(Combo::Ronda_11) && card_2.value == 11){
+            // Ronda_11 (pair of 11)
+            m_combo = Combo::Ronda_11;
+            m_combo_name = "Ronda (11)";
+            return;
+        }
+        else if (is_allowed(Combo::Ronda_10) && card_2.value == 10){
+            // Ronda_10 (pair of 10)
+            m_combo = Combo::Ronda_10;
+            m_combo_name = "Ronda (10)";
+            return;
+        }
+        else if (is_allowed(Combo::Ronda)){
+            // Ronda (pair of [1-7])
+            m_combo = Combo::Ronda;
+            m_combo_name = "Ronda";
+            return;
         }
     }
 
-    if (m_max_combo_allowed == Combo::Registro) {
-        // Check for Registro (1, 11, 12)
-        if (card_1 == 1 && card_2 == 11 && card_3 == 12){
-            m_combo = Combo::Registro;
-            m_combo_name = "Registro";
-            return;
-        }
-
-        // Check for Vigia ( X, X, {X+1}) or ( {X-1}, X, X)
-        else if (  (  (card_1 == card_2)
-                   && (card_3 == card_1 + 1))
-                || (  (card_2 == card_3)
-                   && (card_1 == card_2 - 1)) )
-        {
-            m_combo = Combo::Vigia;
-            m_combo_name = "Vigia";
-            return;
-        }
-
-        // Check for Partrulla ( X, {X+1}, {X+2} )
-        else if (  (card_1 + 1 == card_2)
-                && (card_1 + 2 == card_3) )
-        {
-            m_combo = Combo::Patrulla;
-            m_combo_name = "Patrulla";
-            return;
-        }
-
-        // Check for Trivilin ( X, X, X )
-        else if (card_1 == card_2 && card_2 == card_3)
-        {
-            m_combo = Combo::Trivilin;
-            m_combo_name = "Trivilin";
-            return;
-        }
-
-        // Check for Ronda... ( X, X, *) or ( *, X, X)
-        else if (card_1 == card_2 || card_2 == card_3) {
-            // The following checks only check the value of the second card
-            // because if a pair exists the middle card will always be one of it
-
-            switch(card_2.value()){
-            case 12:
-                // Ronda_12 (pair of 12)
-                m_combo = Combo::Ronda_12;
-                m_combo_name = "Ronda (12)";
-                break;
-
-            case 11:
-                // Ronda_11 (pair of 11)
-                m_combo = Combo::Ronda_11;
-                m_combo_name = "Ronda (11)";
-                break;
-
-            case 10:
-                // Ronda_10 (pair of 10)
-                m_combo = Combo::Ronda_10;
-                m_combo_name = "Ronda (10)";
-                break;
-
-            default:
-                // Ronda (pair of [1-7])
-                m_combo = Combo::Ronda;
-                m_combo_name = "Ronda";
-                break;
-            }
-            return;
-        }
-
-    // If none of the above conditions are satisfied, then hand has no combo
-    // or no combos allowed (boring)
+    // If none of the above conditions are satisfied, then hand has no combo or no combos allowed (boring)
     m_combo = Combo::None;
     m_combo_name = "";
-    }
+    return;
 }
 
 
