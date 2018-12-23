@@ -20,7 +20,7 @@ template<bool Teamed, class Card_type, class Player_type, class Table_type, clas
 class Game {
 public:
     explicit Game(Uniform_random_engine& random_engine, Combo max_combo_allowed = Combo::Registro)
-        : m_random_engine(random_engine), m_max_combo_allowed(max_combo_allowed)
+        : m_random_engine(random_engine)
     {
         // fill cards from which table should copy
         for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
@@ -28,9 +28,18 @@ public:
                 m_cards.push_back(Card_type(val, suit));
             }
         }
-        std::cout << "g-cards-size:" << m_cards.size() << '\n';
+        std::fill_n(m_allowed_combos.begin(), static_cast<int>(max_combo_allowed), true);
     }
-
+    explicit Game(Uniform_random_engine& random_engine, std::array<bool, 12> allowed_combos)
+        : m_random_engine(random_engine), m_allowed_combos(allowed_combos)
+    {
+        // fill cards from which table should copy
+        for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
+            for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas, Suit::Oros}){
+                m_cards.push_back(Card_type(val, suit));
+            }
+        }
+    }
 
     virtual ~Game() = default;
 
@@ -116,7 +125,7 @@ private:
 
     State m_last_game_state = {};
 
-    Combo m_max_combo_allowed = Combo::Registro;
+    std::array<bool, 12> m_allowed_combos;
 
     bool m_just_inited = false;
 };
@@ -202,7 +211,7 @@ template<bool Teamed, class Card_type, class Player_type, class Table_type, clas
 template<class... Args>
 void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::add_player(Args... args)
 {
-    m_players.emplace_back(m_id_count++, m_table, m_max_combo_allowed, std::forward<Args>(args)...);
+    m_players.emplace_back(m_id_count++, m_table, m_allowed_combos, std::forward<Args>(args)...);
 }
 
 template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
