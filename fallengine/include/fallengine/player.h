@@ -30,6 +30,10 @@ public:
         : m_current_table(current_table), m_hand(max_combo), m_id(id)
     {
     }
+    Player(int id, Table<Card_type>& current_table, std::array<bool, 12> allowed_combos)
+        : m_current_table(current_table), m_hand(allowed_combos), m_id(id)
+    {
+    }
     Player(Player<Teamed, Card_type>&& other) = default;
     Player& operator=(Player<Teamed, Card_type>&& other) = default;
     Player(Player<Teamed, Card_type>& other) = default;
