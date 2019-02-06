@@ -28,10 +28,10 @@
  *
  */
 
-#include "fallengine/game.h"
-#include "fallengine/player.h"
-#include "fallengine/table.h"
-#include "fallengine/hand.h"
-#include "fallengine/card.h"
+#include "game.h"
+#include "player.h"
+#include "table.h"
+#include "hand.h"
+#include "card.h"
 
 #endif // FALLENGINE_H_INCLUDED
