@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "../include/fallengine.h"
+#include "../include/fallengine/fallengine.h"
 #include "../include/fespar/fespar.h"
 
 template<class Game_type>
