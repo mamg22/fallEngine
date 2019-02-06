@@ -7,8 +7,6 @@
 #include "../include/fallengine.h"
 #include "../include/fespar/fespar.h"
 
-// TODO: Reparar Table::take_card, que eleimina cosas basado en la posicion y no en la carte en si (Semilla 99, eliminar 2, 3. elimina 2, 7)
-
 template<class Game_type>
 void report_round(int& round, Game_type& game)
 {
