@@ -186,7 +186,11 @@ void Player<Teamed, Card_type>::set_cards(FWIterator begin, FWIterator end)
 template<bool Teamed, class Card_type>
 bool Player<Teamed, Card_type>::select(Card_type& card)
 {
-    auto& prev_select = next_selection();
+    Card dummy(-1);
+    Card_type* prev_select = &dummy;
+    if (m_selection.size() > 0){
+        prev_select = &last_selection();
+    }
 
     auto hand_begin = m_hand.get_cards().begin();
     auto hand_end = m_hand.get_cards().end();
@@ -200,8 +204,8 @@ bool Player<Teamed, Card_type>::select(Card_type& card)
     // 3rd, 4th, ..., card selected AND same as last selected but increased by 1
     // AND not in own hand
 
-    if (  (  (m_selection.size() > 1) && (card == prev_select + 1) && (!in_hand))
-       || (  (m_selection.size() == 1) && (card == prev_select) && (!in_hand))
+    if (  (  (m_selection.size() >= 2) && (card == *prev_select + 1) && (!in_hand))
+       || (  (m_selection.size() == 1) && (card == *prev_select) && (!in_hand))
        || (  (m_selection.size() == 0) && (in_hand)) )
     {
         m_selection.emplace_back(card);
@@ -234,6 +238,8 @@ std::pair<bool, bool> Player<Teamed, Card_type>::play_cards(bool caida_enabled)
     auto select_beg = m_selection.begin();
     auto select_end = m_selection.end();
 
+    std::vector<Card> selection_cp(select_beg, select_end);
+
     auto& table_cards = m_current_table.get().get_table_cards();
 
     // Don't play if just selected one (own) card, but its already on the table
@@ -248,7 +254,7 @@ std::pair<bool, bool> Player<Teamed, Card_type>::play_cards(bool caida_enabled)
         return {false, false};
     }
 
-    if (m_current_table.get().play_cards(select_beg, select_end)){
+    if (m_current_table.get().play_cards(selection_cp.begin(), selection_cp.end())){
         increase_score(4);
     }
 
