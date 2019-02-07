@@ -242,6 +242,19 @@ std::pair<bool, bool> Player<Teamed, Card_type>::play_cards(bool caida_enabled)
 
     auto& table_cards = m_current_table.get().get_table_cards();
 
+    bool has_caida = false;
+
+    if (caida_enabled && (m_current_table.get().last_card_placed()) && (*(m_current_table.get().last_card_placed()) == m_selection.front().get()))
+    {
+        has_caida = true;
+        if ((1 <= m_selection.front().get()) && (m_selection.front().get() <= 7)){
+            increase_score(1);
+        }
+        else {
+            // just for cards in range 10..12
+            increase_score(m_selection.front().get().value() - 8);
+        }
+    }
     // Don't play if just selected one (own) card, but its already on the table
     if (m_selection.size() == 1 && std::find(table_cards.begin(), table_cards.end(), *select_beg) != table_cards.end()){
         //CLEAR SELECT
@@ -263,22 +276,9 @@ std::pair<bool, bool> Player<Teamed, Card_type>::play_cards(bool caida_enabled)
         m_cards_accumulated += m_selection.size(); // No. of cards collected
     }
 
-    bool has_caida = false;
-
     // This checks for a "caida", where if the previous player placed a card
     // and this player takes it with his own card of the same value, then it
     // gives extra points
-    if (caida_enabled && (m_current_table.get().last_card_placed()) && (*(m_current_table.get().last_card_placed()) == select_beg->get()))
-    {
-        has_caida = true;
-        if ((1 <= select_beg->get()) && (select_beg->get() >= 7)){
-            increase_score(1);
-        }
-        else {
-            // just for cards in range 10..12
-            increase_score(select_beg->get().value() - 8);
-        }
-    }
     m_hand.erase(select_beg->get());
     m_selection.clear();
     return {has_caida, true};

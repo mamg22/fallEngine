@@ -121,7 +121,7 @@ bool Table<Card_type>::play_cards(FWIterator begin, FWIterator end)
     }
     else if (cards_played == 1){
         m_table_cards.push_back(std::move(*begin));
-        m_last_card_placed = &(*m_table_cards.end());
+        m_last_card_placed = &(m_table_cards.back());
         return false;
     }
     else {
