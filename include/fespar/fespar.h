@@ -4,7 +4,7 @@
 #include <map>
 #include <functional>
 
-#include "../fallengine.h"
+#include "../fallengine/fallengine.h"
 
 template<class Game_type>
 class Fespar {
