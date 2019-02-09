@@ -221,7 +221,6 @@ void Player<Teamed, Card_type>::reset_state()
 {
     m_selection.clear();
     m_hand.reset();
-    m_score = 0;
     m_cards_accumulated = 0;
 }
 

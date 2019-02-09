@@ -7,8 +7,6 @@
 #include "../include/fallengine/fallengine.h"
 #include "../include/fespar/fespar.h"
 
-// TODO: Fix bug where score get reset after a deal 
-
 template<class Game_type>
 void report_round(int& round, Game_type& game)
 {
