@@ -290,6 +290,7 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
             }
         }
         if (players_with_cards == 0){
+            m_best_combo_player->increase_score(m_best_combo_player->get_combo());
             if (!m_table.is_deck_empty()){
                 for (auto& player : m_players){
                     player.reset_state();
@@ -299,11 +300,10 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
                 // set the player with the greatest combo, only it will get the bonus
                 // from his combo
                 set_best_combo_player();
-
+                // HERE is ya trouble, the combo is changed before giving the bonus i should put it elsewhere
                 // in a new deal, last_placed is invalidated
                 m_table.reset_last_placed();
 
-                m_best_combo_player->increase_score(m_best_combo_player->get_combo());
             }
             else {
                 count_cards();
@@ -382,18 +382,38 @@ void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::co
 template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::set_best_combo_player()
 {
-    // TODO: Fix some bugs:
-    //
-    // Edge case for when combo is Ronda, which the below code might cause that if a player has a pair of 2, but
-    // a card of 12, it qualifies better than a player with a pair of 3 but a card of 5
-    // ^~ FIXED maybe evaluate using the middle card (always belongs to the pair) and then if both are the same, then continue the
-    //    execution as usual, else just fall into a continue and only set the best player if it is greater than it;
-    //
-    // fix that if two players have the same combo, and exactly the same hand, then the one closer to the dealer gets it
-    // ^~ maybe iterate starting from (dealer-1) to (dealer) instead of the order in the vector FIXED
-
-    for (auto current = rotate_player(m_dealer, -1);; current = rotate_player(current, -1)){
+    int player_count = m_players.size();
+    for (auto current = rotate_player(m_dealer, -1);player_count > 0; current = rotate_player(current, -1)){
         auto& player = *current;
+        
+        if (!m_best_combo_player){
+            m_best_combo_player = &player;
+            --player_count;
+            continue;
+        }
+        auto& bc_player = *m_best_combo_player;
+        if (player.get_combo() > bc_player.get_combo()){
+            m_best_combo_player = current;
+        }
+        else if (player.get_combo() == bc_player.get_combo()){
+            if (player.get_combo() == Combo::Ronda && player.get_cards()[1] > bc_player.get_cards()[1]){
+                // Ronda includes values from range [1-7], so it can be hard to determine which one is the best
+                m_best_combo_player = current;
+                --player_count;
+                continue;
+            }
+
+            for (auto player_hand_it = player.get_cards().rbegin(), best_hand_it = m_best_combo_player->get_cards().rbegin();
+                 player_hand_it != player.get_cards().rend(); ++player_hand_it, ++best_hand_it){
+                if (player_hand_it->value() > best_hand_it->value()){
+                    m_best_combo_player = &player;
+                    break;
+                }
+            }
+        }
+        --player_count;
+        // THE FUCKING BUG WASN'T HERE! i forgot to add the bonus
+        /*
         std::cout << "Setting best combo for " << player.id() << '\n';
         if (m_best_combo_player){ // if not null/empty
             if (player.get_combo() == m_best_combo_player->get_combo()){
@@ -402,7 +422,6 @@ void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::se
                     player.get_combo() == Combo::Ronda_11 || player.get_combo() == Combo::Ronda_12){
                     if (player.get_cards()[1] > m_best_combo_player->get_cards()[1]){
                         m_best_combo_player = &player;
-                        continue;
                     }
                 }
                 // if they both share the same combo, the one with the greatest card gets the points
@@ -421,9 +440,9 @@ void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::se
         else {
             m_best_combo_player = &player;
         }
-        if (current == m_dealer){
+        if (--player_count){
             break;
-        }
+        }*/
     }
     /*
     for (auto& player : m_players){
