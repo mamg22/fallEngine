@@ -7,7 +7,6 @@
 #include "../include/fallengine/fallengine.h"
 #include "../include/fespar/fespar.h"
 
-// TODO Fix bug where bonus is not given
 template<class Game_type>
 void report_round(int& round, Game_type& game)
 {
