@@ -7,6 +7,11 @@
 #include "../include/fallengine/fallengine.h"
 #include "../include/fespar/fespar.h"
 
+/* TODO: Add some behavior in Game to disallow some behavior when the game is and is not running (such as adding players after the game
+ * begun or similar
+ * 
+ * Find a way to record a game and replay it given a file, because repeating it is annoying (see notes)
+ */
 template<class Game_type>
 void report_round(int& round, Game_type& game)
 {
@@ -69,13 +74,10 @@ int main()
     report_round(round, game);
     print_state(game);
     std::cin.ignore(256, '\n');
-
+    // open argv[1] as file, then pass argv[2] as (w)record or (r)replay
     
     while (std::getline(std::cin, line, '\n')){
-        
-        //auto spli = split(line, ' ');
-        //std::cout << spli.size();
-        //for (auto& str: spli){std::cout << str;}
+        // write line to file
         std::istringstream sline(line);
         while (sline >> arg){
             arguments.push_back(arg);
@@ -85,37 +87,9 @@ int main()
         arguments.clear();
         report_round(round, game);
         print_state(game);
-        //std::cin.ignore(256, '\n');
-        //if (!std::cin) throw 1;
     }
-    /*
-    std::cout << 'b' << game.get_table_cards().size();
-    game.init_game();
-    std::cout << 'i' << game.get_table_cards().size();
-    game.step();
-    std::cout << 's' << game.get_table_cards().size();
-    std::cout << '\n';
-    report_round(round, game);
-
-    print_state(game);
-
-    game.current_player().select(game.current_player().get_cards()[0]);
-    game.current_player().reset_selection();
-    game.current_player().select(game.current_player().get_cards()[1]);
-    game.step();
-
-    report_round(round, game);
-    print_state(game);
-
-    game.current_player().select(game.current_player().get_cards()[2]);
-    game.step();
-
-    report_round(round, game);
-    print_state(game);
-
     // TODO: now test the player's methods, and continue the game, and make the interpeter for the small scripting
     // language that allows game automation (defined in fallengine/fescript/commands.txt
-*/
 }
 
 
