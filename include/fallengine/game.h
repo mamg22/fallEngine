@@ -132,6 +132,10 @@ public:
     {
         return m_is_playing;
     }   
+    State get_last_state()
+    {
+        return m_last_game_state;
+    }
 private:
     auto rotate_player(Player_type* player, int step);
     void set_best_combo_player();
@@ -412,68 +416,6 @@ void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::se
             }
         }
         --player_count;
-        // THE FUCKING BUG WASN'T HERE! i forgot to add the bonus
-        /*
-        std::cout << "Setting best combo for " << player.id() << '\n';
-        if (m_best_combo_player){ // if not null/empty
-            if (player.get_combo() == m_best_combo_player->get_combo()){
-
-                if (player.get_combo() == Combo::Ronda || player.get_combo() == Combo::Ronda_10 ||
-                    player.get_combo() == Combo::Ronda_11 || player.get_combo() == Combo::Ronda_12){
-                    if (player.get_cards()[1] > m_best_combo_player->get_cards()[1]){
-                        m_best_combo_player = &player;
-                    }
-                }
-                // if they both share the same combo, the one with the greatest card gets the points
-                for (auto player_hand_it = player.get_cards().rbegin(), best_hand_it = m_best_combo_player->get_cards().rbegin();
-                     player_hand_it != player.get_cards().rend(); ++player_hand_it, ++best_hand_it){
-                    if (player_hand_it->value() > best_hand_it->value()){
-                        m_best_combo_player = &player;
-                        break;
-                    }
-                }
-            }
-            else if (player.get_combo() > m_best_combo_player->get_combo()){
-                m_best_combo_player = &player;
-            }
-        }
-        else {
-            m_best_combo_player = &player;
-        }
-        if (--player_count){
-            break;
-        }*/
-    }
-    /*
-    for (auto& player : m_players){
-        if (m_best_combo_player){ // if not null/empty
-            if (player.get_combo() == m_best_combo_player->get_combo()){
-
-                if (player.get_combo() == Combo::Ronda || player.get_combo() == Combo::Ronda_10 ||
-                    player.get_combo() == Combo::Ronda_11 || player.get_combo() == Combo::Ronda_12){
-                    if (player.get_cards()[1] > m_best_combo_player->get_cards()[1]){
-                        m_best_combo_player = &player;
-                        continue;
-                    }
-                }
-                // if they both share the same combo, the one with the greatest card gets the points
-                for (auto player_hand_it = player.get_cards().rbegin(), best_hand_it = m_best_combo_player->get_cards().rbegin();
-                     player_hand_it != player.get_cards().rend(); ++player_hand_it, ++best_hand_it){
-                    if (player_hand_it->value() > best_hand_it->value()){
-                        m_best_combo_player = &player;
-                        break;
-                    }
-                }
-            }
-            else if (player.get_combo() > m_best_combo_player->get_combo()){
-                m_best_combo_player = &player;
-            }
-        }
-        else {
-            m_best_combo_player = &player;
-        }
-    }
-    */
 }
 
 //} End of Game methods

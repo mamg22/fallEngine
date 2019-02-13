@@ -76,6 +76,7 @@ int main()
     std::cin.ignore(256, '\n');
     // open argv[1] as file, then pass argv[2] as (w)record or (r)replay
     
+
     while (std::getline(std::cin, line, '\n')){
         // write line to file
         std::istringstream sline(line);
@@ -86,6 +87,7 @@ int main()
         fes.exec_op(arguments);
         arguments.clear();
         report_round(round, game);
+        game.get
         print_state(game);
     }
     // TODO: now test the player's methods, and continue the game, and make the interpeter for the small scripting
