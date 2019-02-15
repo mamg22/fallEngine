@@ -83,13 +83,17 @@ int main()
         while (sline >> arg){
             arguments.push_back(arg);
         }
+        if (game.is_playing()) game.get_players()[0].increase_score(4);
         std::cout << arguments.size();
         fes.exec_op(arguments);
+        if (game.get_last_state().winner_found) break;
         arguments.clear();
         report_round(round, game);
-        game.get
         print_state(game);
+
     }
+
+    std::cout << "\n\nWINNER:" << game.find_winners()[0].get().id();
     // TODO: now test the player's methods, and continue the game, and make the interpeter for the small scripting
     // language that allows game automation (defined in fallengine/fescript/commands.txt
 }

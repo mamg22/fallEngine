@@ -70,7 +70,7 @@ public:
 
     State step(bool count_from_4 = false); // count_from_4 only used when Waiting_next_round was returned before
 
-    std::vector<std::reference_wrapper<Player_type>> find_winners() const;
+    std::vector<std::reference_wrapper<Player_type>> find_winners();
 
     void order_players(int new_first_id);
 
@@ -132,6 +132,7 @@ public:
     {
         return m_is_playing;
     }   
+
     State get_last_state()
     {
         return m_last_game_state;
@@ -173,7 +174,7 @@ private:
 };
 
 
-//{ Game methods
+// Game methods
 
 template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 auto Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::rotate_player(Player_type* player, int step)
@@ -218,7 +219,7 @@ void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::or
 }
 
 template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-std::vector<std::reference_wrapper<Player_type>> Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::find_winners() const
+std::vector<std::reference_wrapper<Player_type>> Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::find_winners() 
 {
     std::vector<std::reference_wrapper<Player_type>> ret{};
     for (auto& player : m_players){
@@ -278,7 +279,6 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
     State ret;
     if (!(m_last_game_state.waiting_next_round)){
         // play cards, branch if caida happened
-
         auto[caida, valid] = m_current_player->play_cards(!(m_table.is_deck_empty()));
 
         ret.caida = caida;
@@ -319,6 +319,12 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
         }
         if (m_table.get_table_cards().empty()){
             ret.table_clear = true;
+        }
+        for (auto& player : m_players){
+            if (player.is_winner()){
+                ret.winner_found = true;
+                break; // No longer need to loop
+            }
         }
     }
     else {
@@ -416,9 +422,10 @@ void Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::se
             }
         }
         --player_count;
+    }
 }
 
-//} End of Game methods
+// End of Game methods
 
 
 
