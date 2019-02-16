@@ -304,7 +304,6 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
                 // set the player with the greatest combo, only it will get the bonus
                 // from his combo
                 set_best_combo_player();
-                // HERE is ya trouble, the combo is changed before giving the bonus i should put it elsewhere
                 // in a new deal, last_placed is invalidated
                 m_table.reset_last_placed();
 
@@ -313,9 +312,6 @@ Game<Teamed, Card_type, Player_type, Table_type, Uniform_random_engine>::step(bo
                 count_cards();
                 ret.waiting_next_round = true;
             }
-        }
-        else if (players_with_cards == 1 && m_table.is_deck_empty()){
-            // winner_found = next_round(count_from_4);
         }
         if (m_table.get_table_cards().empty()){
             ret.table_clear = true;

@@ -15,7 +15,7 @@
 template<class Game_type>
 void report_round(int& round, Game_type& game)
 {
-    if (!game.is_playing()) {std::cout << "!!!"; return;};
+    if (!game.is_playing()) {return;};
     try {game.current_player();} catch (Player_not_found_exception& e){return;}
     std::cout << "Round: " << round++ << "\n===============================\n" <<
     "CP: " << game.current_player().id() << " DP: " << game.dealer().id() << " BC: " << game.best_combo_p().id() << "\n\n";
@@ -24,7 +24,7 @@ void report_round(int& round, Game_type& game)
 template<class Game_type>
 void print_state(Game_type& game)
 {
-    if (!game.is_playing()) {std::cout << "!!!"; return;};
+    if (!game.is_playing()) {return;};
     try {game.current_player();} catch (Player_not_found_exception& e){return;}
     std::cout << "Table: ";
     for (auto& card : game.get_table_cards()){
@@ -65,7 +65,7 @@ int main()
     std::cin >> seed;
     std::cout << '\n';
     std::mt19937 eng(seed);
-    Game<false, Card, Player<false, Card>, Table<Card>, decltype(eng)> game(eng, Combo::Casa_grande);
+    Game<false, Card, Player<false, Card>, Table<Card>, decltype(eng)> game(eng);
     Fespar<decltype(game)> fes(game);
     
     std::string line;
@@ -84,13 +84,13 @@ int main()
             arguments.push_back(arg);
         }
         if (game.is_playing()) game.get_players()[0].increase_score(4);
-        std::cout << arguments.size();
         fes.exec_op(arguments);
         if (game.get_last_state().winner_found) break;
         arguments.clear();
+        std::cout << '\n';
         report_round(round, game);
         print_state(game);
-
+        
     }
 
     std::cout << "\n\nWINNER:" << game.find_winners()[0].get().id();

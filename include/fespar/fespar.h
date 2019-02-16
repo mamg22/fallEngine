@@ -100,14 +100,13 @@ Fespar<Game_type>::Fespar(Game_type& game)
 template<class Game_type>
 int Fespar<Game_type>::exec_op(std::vector<std::string> ops)
 {
-    if (ops.size() == 0){std::cout << "WHOOPSIE"; return -2;};
+    if (ops.size() == 0){return -2;};
     auto& opcode = ops[0];
     if (m_op_codes.find(opcode) != m_op_codes.end()){
-        std::cout << opcode;
         return m_op_codes[opcode](std::vector<std::string>(ops.begin()+1, ops.end()));
     }
     else {
-        std::cout << "WHOOPS";
+        std::cout << "OP not found\n";
         return -1;
     }
     // if exists in map execute and return the result
