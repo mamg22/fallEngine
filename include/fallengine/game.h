@@ -18,9 +18,24 @@
 
 class Player_not_found_exception : public std::exception {
 public:
-    virtual const char * what() const noexcept {
+    virtual const char * what() const noexcept 
+    {
         return "The requested player with the given ID in not in the current players, please check the available player IDs";
     }
+};
+
+class Op_not_valid_currently_exception : public std::exception {
+public:
+    Op_not_valid_currently_exception(const char * func_name, bool game_running_allowed) 
+    {
+        text = std::string("Called function ") + func_name + " while the game was " + (game_running_allowed ? "" : "not ") + "running";
+    }
+
+    virtual const char * what() const noexcept {
+        return text.c_str();
+    }
+private:
+    std::string text;
 };
 
 template<bool Teamed, class Card_type, class Player_type, class Table_type, class Uniform_random_engine>

@@ -67,7 +67,7 @@ int main()
     std::mt19937 eng(seed);
     Game<false, Card, Player<false, Card>, Table<Card>, decltype(eng)> game(eng);
     Fespar<decltype(game)> fes(game);
-    
+
     std::string line;
     std::string arg;
     std::vector<std::string> arguments;
