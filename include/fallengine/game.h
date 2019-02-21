@@ -15,6 +15,7 @@
 #include "table.h"
 #include "player.h"
 
+// TODO: Remove the Teamed template parameter and replace it with a constructor parameter, same for player
 
 class Player_not_found_exception : public std::exception {
 public:

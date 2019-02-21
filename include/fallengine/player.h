@@ -9,9 +9,6 @@
 #include <exception>
 #include <utility>
 
-template<bool Teamed, class Card_type>
-class Player;
-
 #include "hand.h"
 #include "table.h"
 
@@ -34,12 +31,7 @@ public:
         : m_current_table(current_table), m_hand(allowed_combos), m_id(id)
     {
     }
-    /*
-    Player(Player<Teamed, Card_type>&& other) = default;
-    Player& operator=(Player<Teamed, Card_type>&& other) = default;
-    Player(Player<Teamed, Card_type>& other) = default;
-    Player& operator=(Player<Teamed, Card_type>& other) = default;
-    */
+
     std::vector<Card_type>& get_cards()
     {
         return m_hand.get_cards();

@@ -1,16 +1,11 @@
 #ifndef TABLE_H_INCLUDED
 #define TABLE_H_INCLUDED
 
-template<class Card_type>
-class Table;
-
 #include <algorithm>
 #include <utility>
 #include <array>
 #include <cmath>
 #include <iostream>
-
-#include "player.h"
 
 template<class Card_type>
 class Table {
@@ -161,6 +156,8 @@ bool Table<Card_type>::take_card(Card_type& card)
     else {
         return false;
     }
+
+    
 }
 
 template<class Card_type>
