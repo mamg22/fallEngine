@@ -65,7 +65,7 @@ int main()
     std::cin >> seed;
     std::cout << '\n';
     std::mt19937 eng(seed);
-    Game<false, Card, Player<false, Card>, Table<Card>, decltype(eng)> game(eng);
+    Game<Card, Player<Card>, Table<Card>, decltype(eng)> game(eng, false);
     Fespar<decltype(game)> fes(game);
 
     std::string line;
