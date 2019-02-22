@@ -36,6 +36,7 @@ Fespar<Game_type>::Fespar(Game_type& game)
             auto& target = m_game.get_player(std::stoi(args[0]));
             auto& partner = m_game.get_player(std::stoi(args[1])); 
             target.set_partner(partner);
+            partner.set_partner(target);
             return 0;
         }
         catch (const Player_not_found_exception& e){

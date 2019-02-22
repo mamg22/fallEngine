@@ -65,7 +65,7 @@ int main()
     std::cin >> seed;
     std::cout << '\n';
     std::mt19937 eng(seed);
-    Game<Card, Player<Card>, Table<Card>, decltype(eng)> game(eng, false);
+    Game<Card, Player<Card>, Table<Card>, decltype(eng)> game(eng, true);
     Fespar<decltype(game)> fes(game);
 
     std::string line;
@@ -83,11 +83,11 @@ int main()
         while (sline >> arg){
             arguments.push_back(arg);
         }
-        if (game.is_playing()) game.get_players()[0].increase_score(4);
         fes.exec_op(arguments);
         if (game.get_last_state().winner_found) break;
         arguments.clear();
-        std::cout << '\n';
+        // Clear the screen
+        std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
         report_round(round, game);
         print_state(game);
         
