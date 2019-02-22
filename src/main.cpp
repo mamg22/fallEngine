@@ -3,6 +3,7 @@
 #include <random>
 #include <iomanip>
 #include <sstream>
+#include <array>
 
 #include "../include/fallengine/fallengine.h"
 #include "../include/fespar/fespar.h"
@@ -57,15 +58,39 @@ std::vector<std::string> split(const std::string& s, char delimiter)
    return tokens;
 }
 
+bool y_n_ask(auto prompt)
+{
+    char choice = 'n';
+    std::cout << prompt << " [y/n]: ";
+    std::cin >> choice;
+    if (choice == 'y' || choice == 'Y'){return true;}
+    return false;
+}
+
 int main()
 {
     int round = 0;
-    std::cout << "SEED: ";
+    
+    std::cout << "Seed: ";
     int seed = 0;
     std::cin >> seed;
     std::cout << '\n';
     std::mt19937 eng(seed);
-    Game<Card, Player<Card>, Table<Card>, decltype(eng)> game(eng, true);
+    
+    bool teamed = y_n_ask("Teamed");
+    bool enable_trivilin = y_n_ask("Use Trivilin");
+    bool enable_extra_combos = y_n_ask("Use estra combos");
+
+    std::array<bool, 12> combos = {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0};
+    if (!enable_trivilin){combos[4] = false;}
+    if (enable_extra_combos){
+        combos[8] = true;
+        combos[9] = true;
+        combos[10] = true;
+        combos[11] = true;
+    }
+    
+    Game<Card, Player<Card>, Table<Card>, decltype(eng)> game(eng, teamed, combos);
     Fespar<decltype(game)> fes(game);
 
     std::string line;
