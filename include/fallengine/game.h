@@ -42,7 +42,7 @@ template<class Card_type, class Player_type, class Table_type, class Uniform_ran
 class Game {
 public:
     explicit Game(Uniform_random_engine& random_engine, bool teamed, Combo max_combo_allowed = Combo::Registro)
-        : m_is_teamed(teamed), m_random_engine(random_engine)
+        : m_random_engine(random_engine), m_is_teamed(teamed)
     {
         // fill cards from which table should copy
         for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
@@ -53,7 +53,7 @@ public:
         std::fill_n(m_allowed_combos.begin(), static_cast<int>(max_combo_allowed), true);
     }
     explicit Game(Uniform_random_engine& random_engine, bool teamed, std::array<bool, 12> allowed_combos)
-        : m_is_teamed(teamed), m_random_engine(random_engine), m_allowed_combos(allowed_combos)
+        : m_random_engine(random_engine), m_is_teamed(teamed), m_allowed_combos(allowed_combos)
     {
         // fill cards from which table should copy
         for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){

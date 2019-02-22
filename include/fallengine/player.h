@@ -24,11 +24,11 @@ template<class Card_type>
 class Player {
 public:
     Player(bool teamed, int id, Table<Card_type>& current_table, Combo max_combo = Combo::Registro)
-        : m_teamed(teamed), m_current_table(current_table), m_hand(max_combo), m_id(id)
+        : m_current_table(current_table), m_hand(max_combo), m_id(id), m_teamed(teamed)
     {
     }
     Player(bool teamed, int id, Table<Card_type>& current_table, std::array<bool, 12> allowed_combos)
-        : m_teamed(teamed), m_current_table(current_table), m_hand(allowed_combos), m_id(id)
+        : m_current_table(current_table), m_hand(allowed_combos), m_id(id), m_teamed(teamed) 
     {
     }
 
