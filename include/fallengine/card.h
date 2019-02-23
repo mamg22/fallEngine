@@ -12,10 +12,6 @@ enum class Suit {
 class Card {
 public:
 
-    //Card(Card& other) = default;
-    //Card& operator=(Card& other) = default;
-    //Card(Card&& other) = default;
-    //Card& operator=(Card&& other) = default;
     Card(int value, Suit suit = Suit::None)
     : m_value(value), m_suit(suit)
     {
@@ -35,13 +31,6 @@ public:
         return m_suit;
     }
 
-    //virtual void swap(Card& rhs)
-    //{
-    //    auto tmp(*this);
-    //    *this = rhs;
-    //    rhs = tmp;
-    //}
-
     // these both return a copy of this card with increased/decreased value
     Card operator+(int increase) const;
 
@@ -51,11 +40,6 @@ private:
     int m_value = 1;
     Suit m_suit = Suit::None;
 };
-
-//void swap(Card& lhs, Card& rhs)
-//{
-//    lhs.swap(rhs);
-//}
 
 Card Card::operator+(int increase) const
 {

@@ -214,46 +214,6 @@ int Table<Card_type>::init_round(bool count_from_4)
     }
 
     return match_bonus;
-    // Kept here for comparison: simpler code (up) is better than spaghetti code (down)
-    /*
-    for (int bonus = count_from_4 ? 4 : 1; count_from_4 ? bonus > 0 : bonus < 5; count_from_4 ? bonus-- : bonus++){
-        std::cout << bonus;
-        if (!(begin == end)){
-            if (std::find(m_table_cards.begin(), m_table_cards.end(), *begin) == m_table_cards.end()){
-                if (*begin == bonus){
-                    match_bonus += bonus;
-                }
-                m_table_cards.push_back(std::move(*begin));
-                m_deck.erase(begin);
-            }
-            ++begin;
-        }
-        else {
-            std::cout << '?' << bonus << '?';
-            break;
-        }
-    }
-
-    // Todo: rewrite this to use manual iteration, because this is kinda messy, and maybe buggy
-    
-    for (auto& card : m_deck){
-        if (bonus != 0 || bonus != 5){
-            if (std::find(m_table_cards.begin(), m_table_cards.end(), card) == m_table_cards.end())
-            {
-                if (card == std::abs(bonus)){
-                    match_bonus += std::abs(bonus);
-                }
-                ++bonus;
-                m_table_cards.push_back(std::move(card));
-                m_deck.erase(std::find(m_deck.begin(), m_deck.end(), card));
-            }
-        }
-        else {
-            break;
-        }
-    }
-    */
-
 }
 
 template<class Card_type>

@@ -217,7 +217,6 @@ void Player<Card_type>::reset_state()
     m_cards_accumulated = 0;
 }
 
-
 template<class Card_type>
 void Player<Card_type>::count_cards(int base)
 {

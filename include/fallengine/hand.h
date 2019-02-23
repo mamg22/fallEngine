@@ -25,8 +25,6 @@ enum class Combo {
     Casa_grande,
 };
 
-// TODO: Do testing, a lot
-
 template<class Card_type>
 class Hand {
 public:
@@ -115,9 +113,6 @@ void Hand<Card_type>::set_cards(FWIterator begin, FWIterator end)
     for (;begin != end; begin++){
         m_cards.push_back(*begin);
     }
-    //m_cards.reserve(3);
-    //std::copy(begin, end, m_cards.begin()); // FAIL
-    //m_cards.assign(begin, end); // FAIL
     analize_hand();
 }
 
@@ -216,27 +211,21 @@ void Hand<Card_type>::analize_hand()
         if (is_allowed(Combo::Ronda_12) && card_2.value() == 12){
             // Ronda_12 (pair of 12)
             m_combo = Combo::Ronda_12;
-            m_combo_name = "Ronda (12)";
-            return;
         }
         else if (is_allowed(Combo::Ronda_11) && card_2.value() == 11){
             // Ronda_11 (pair of 11)
             m_combo = Combo::Ronda_11;
-            m_combo_name = "Ronda (11)";
-            return;
         }
         else if (is_allowed(Combo::Ronda_10) && card_2.value() == 10){
             // Ronda_10 (pair of 10)
             m_combo = Combo::Ronda_10;
-            m_combo_name = "Ronda (10)";
-            return;
         }
         else if (is_allowed(Combo::Ronda)){
             // Ronda (pair of [1-7])
             m_combo = Combo::Ronda;
-            m_combo_name = "Ronda";
-            return;
         }
+        m_combo_name = "Ronda";
+        return;
     }
 
     // If none of the above conditions are satisfied, then hand has no combo or no combos allowed (boring)

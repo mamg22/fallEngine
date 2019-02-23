@@ -79,7 +79,7 @@ int main()
     
     bool teamed = y_n_ask("Teamed");
     bool enable_trivilin = y_n_ask("Use Trivilin");
-    bool enable_extra_combos = y_n_ask("Use estra combos");
+    bool enable_extra_combos = y_n_ask("Use extra combos");
 
     std::array<bool, 12> combos = {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0};
     if (!enable_trivilin){combos[4] = false;}
@@ -112,7 +112,12 @@ int main()
         if (game.get_last_state().winner_found) break;
         arguments.clear();
         // Clear the screen
-        std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+        if (game.is_playing()){
+            std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+        }
+        else {
+            std::cout << '\n';
+        }
         report_round(round, game);
         print_state(game);
         
