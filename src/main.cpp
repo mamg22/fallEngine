@@ -108,7 +108,12 @@ int main()
         while (sline >> arg){
             arguments.push_back(arg);
         }
-        fes.exec_op(arguments);
+        try {
+            fes.exec_op(arguments);
+        }
+        catch (Op_not_valid_currently_exception& e){
+            std::cout << '\n' << e.what() << '\n';
+        }
         if (game.get_last_state().winner_found) break;
         arguments.clear();
         // Clear the screen

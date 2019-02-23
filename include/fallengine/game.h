@@ -28,7 +28,7 @@ class Op_not_valid_currently_exception : public std::exception {
 public:
     Op_not_valid_currently_exception(const char * func_name, bool game_running_allowed) 
     {
-        text = std::string("Called function ") + func_name + " while the game was " + (game_running_allowed ? "" : "not ") + "running";
+        text = std::string("Called function ") + func_name + " while the game was " + (game_running_allowed ? "not " : "") + "running";
     }
 
     virtual const char * what() const noexcept {
@@ -216,12 +216,14 @@ auto Game<Card_type, Player_type, Table_type, Uniform_random_engine>::rotate_pla
 template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::shuffle_players()
 {
+    if (m_is_playing){throw Op_not_valid_currently_exception("shuffle_players", false);}
     std::shuffle(m_players.begin(), m_players.end(), std::forward<decltype(m_random_engine)>(m_random_engine));
 }
 
 template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::order_players(int new_first_id)
 {
+    if (m_is_playing){throw Op_not_valid_currently_exception("order_players", false);}
     auto new_first = std::find_if(m_players.begin(), m_players.end(), [&](Player_type& player){
                                                                          return player.id() == new_first_id;
                                                                      });
@@ -238,6 +240,7 @@ void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::order_play
 template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 std::vector<std::reference_wrapper<Player_type>> Game<Card_type, Player_type, Table_type, Uniform_random_engine>::find_winners() 
 {
+    if (!m_is_playing){throw Op_not_valid_currently_exception("find_winners", true);}
     std::vector<std::reference_wrapper<Player_type>> ret{};
     for (auto& player : m_players){
         if (player.is_winner()){
@@ -250,6 +253,7 @@ std::vector<std::reference_wrapper<Player_type>> Game<Card_type, Player_type, Ta
 template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 bool Game<Card_type, Player_type, Table_type, Uniform_random_engine>::init_game()
 {
+    if (m_is_playing){throw Op_not_valid_currently_exception("init_game", false);}
     constexpr int cards_in_deck_after_deal = 36;
     // only if is valid player count: 2+ players, and the remaining (36) cards are divided evenly between them
     // or in two Teams of two players each
@@ -272,12 +276,14 @@ template<class Card_type, class Player_type, class Table_type, class Uniform_ran
 template<class... Args>
 void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::add_player(Args... args)
 {
+    if (m_is_playing){throw Op_not_valid_currently_exception("add_player", false);}
     m_players.push_back(Player_type(m_is_teamed, m_id_count++, m_table, m_allowed_combos, std::forward<Args>(args)...));
 }
 
 template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 bool Game<Card_type, Player_type, Table_type, Uniform_random_engine>::remove_player(int id)
 {
+    if (m_is_playing){throw Op_not_valid_currently_exception("remove_player", false);}
     if (auto player = std::find_if(m_players.begin(), m_players.end(), [&](Player_type& plyr){
                                                                            return id == plyr.id();
                                                                         }); player != m_players.end()){
@@ -293,6 +299,7 @@ template<class Card_type, class Player_type, class Table_type, class Uniform_ran
 typename Game<Card_type, Player_type, Table_type, Uniform_random_engine>::State
 Game<Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count_from_4)
 {
+    if (!m_is_playing){throw Op_not_valid_currently_exception("step", true);}
     State ret;
     if (!(m_last_game_state.waiting_next_round)){
         // play cards, branch if caida happened
@@ -388,6 +395,7 @@ Game<Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count
 template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::count_cards()
 {
+    
     constexpr int cards_per_deck = 40;
     const bool three_players = (m_players.size() == 3);
 
