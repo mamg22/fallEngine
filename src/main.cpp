@@ -8,10 +8,7 @@
 #include "../include/fallengine/fallengine.h"
 #include "../include/fespar/fespar.h"
 
-/* TODO: Add some behavior in Game to disallow some behavior when the game is and is not running (such as adding players after the game
- * begun or similar
- * 
- * Find a way to record a game and replay it given a file, because repeating it is annoying (see notes)
+/* TODO: Find a way to record a game and replay it given a file, because repeating it is annoying (see notes)
  */
 template<class Game_type>
 void report_round(int& round, Game_type& game)
@@ -118,7 +115,7 @@ int main()
         arguments.clear();
         // Clear the screen
         if (game.is_playing()){
-            std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+            std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
         }
         else {
             std::cout << '\n';
