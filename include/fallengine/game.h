@@ -259,6 +259,17 @@ bool Game<Card_type, Player_type, Table_type, Uniform_random_engine>::init_game(
     // or in two Teams of two players each
     if (  (m_is_teamed && m_players.size() == 4)
        || (!m_is_teamed && m_players.size() >= 2 && ((cards_in_deck_after_deal / m_players.size()) % 3 == 0))){
+        if (m_is_teamed){
+            for (auto& player: m_players){
+                try {
+                    player.get_partner();
+                }
+                catch (Null_partner_exception& e){
+                    // Cannot init the game if a team player has no partner
+                    return false;
+                }
+            }
+        }
         m_is_playing = true;
         m_just_inited = true;
         m_dealer = to_player_ptr(m_players.begin());

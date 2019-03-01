@@ -67,7 +67,6 @@ bool y_n_ask(auto prompt)
 int main()
 {
     int round = 0;
-    
     std::cout << "Seed: ";
     int seed = 0;
     std::cin >> seed;
@@ -96,7 +95,8 @@ int main()
     report_round(round, game);
     print_state(game);
     std::cin.ignore(256, '\n');
-    // open argv[1] as file, then pass argv[2] as (w)record or (r)replay
+    // TODO: open argv[1] as file, then pass argv[2] as (w)record or (r)replay
+    
     
 
     while (std::getline(std::cin, line, '\n')){
@@ -126,8 +126,6 @@ int main()
     }
 
     std::cout << "\n\nWINNER:" << game.find_winners()[0].get().id();
-    // TODO: now test the player's methods, and continue the game, and make the interpeter for the small scripting
-    // language that allows game automation (defined in fallengine/fescript/commands.txt
 }
 
 
