@@ -30,7 +30,8 @@ void print_state(Game_type& game)
     }
     std::cout << "\n\n";
     for (auto& player : game.get_players()){
-        std::cout << "Player: " << player.id() << "\t S: " << player.get_score() << "\t Combo:" << player.get_combo_name() << '\n';
+        std::cout << "Player: " << player.id() << "\t S: " << player.get_score() << "\t CCnt: " << player.get_cards_accumulated()
+         << "\t Combo:" << player.get_combo_name() << '\n';
         for (auto& card : player.get_cards()){
             std::cout << card.value() << ' ' << static_cast<char>(static_cast<int>(card.suit())+0x40) << " \t";
         }
@@ -97,7 +98,7 @@ int main()
     std::cin.ignore(256, '\n');
     // TODO: open argv[1] as file, then pass argv[2] as (w)record or (r)replay
     
-    
+   
 
     while (std::getline(std::cin, line, '\n')){
         // write line to file

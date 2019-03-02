@@ -332,7 +332,7 @@ Game<Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count
             m_best_combo_player->increase_score(m_best_combo_player->get_combo());
             if (!m_table.is_deck_empty()){
                 for (auto& player : m_players){
-                    player.reset_state();
+                    player.reset_hand();
                 }
                 m_table.deal(m_players.begin(), m_players.end());
 

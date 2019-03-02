@@ -73,7 +73,8 @@ public:
     // Second: false if the played cards weren't valid (e.g. no cards selected,
     //         or selected a own card that is on the table, but didn't select the other, else true
     std::pair<bool, bool> play_cards(bool caida_enabled = true);
-
+    
+    void reset_hand();
     void reset_state();
 
     void count_cards(int base);
@@ -210,11 +211,16 @@ bool Player<Card_type>::select(Card_type& card)
 }
 
 template<class Card_type>
-void Player<Card_type>::reset_state()
+void Player<Card_type>::reset_hand()
 {
     m_selection.clear();
     m_hand.reset();
+}
+template<class Card_type>
+void Player<Card_type>::reset_state()
+{
     m_cards_accumulated = 0;
+    reset_hand();
 }
 
 template<class Card_type>
@@ -253,8 +259,7 @@ std::pair<bool, bool> Player<Card_type>::play_cards(bool caida_enabled)
     }
 
     if (select_beg == select_end){
-            //CLEAR
-
+        //CLEAR
         return {false, false};
     }
 
