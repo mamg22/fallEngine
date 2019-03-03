@@ -226,7 +226,12 @@ void Player<Card_type>::reset_state()
 template<class Card_type>
 void Player<Card_type>::count_cards(int base)
 {
-    increase_score(std::max(m_cards_accumulated - base, 0));
+    if (m_teamed){
+        increase_score(std::max((m_cards_accumulated + m_partner->get_cards_accumulated()) - base, 0));
+    }
+    else {
+        increase_score(std::max(m_cards_accumulated - base, 0));
+    }
 }
 
 template<class Card_type>

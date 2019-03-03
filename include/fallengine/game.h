@@ -268,6 +268,7 @@ bool Game<Card_type, Player_type, Table_type, Uniform_random_engine>::init_game(
                     // Cannot init the game if a team player has no partner
                     return false;
                 }
+            order_players(m_players[0].id());
             }
         }
         m_is_playing = true;
@@ -409,10 +410,16 @@ void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::count_card
     
     constexpr int cards_per_deck = 40;
     const bool three_players = (m_players.size() == 3);
-
+    int players_counted = 0;
+    
     for (auto& player : m_players){
         // if the player isn't the dealer and the game has other than 3 players then do the usual sum
-        if (!(three_players && (player.id() == m_dealer->id()))){
+        if (m_is_teamed){
+            if (players_counted == 2) return;
+            player.count_cards(20);
+            ++players_counted;
+        }
+        else if (!(three_players && (player.id() == m_dealer->id()))){
             player.count_cards(cards_per_deck / m_players.size());
         }
         else { // Count to 14, it is the dealer in a round of 3, so it should count 14 rather than 13, because rules
