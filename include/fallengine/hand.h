@@ -133,14 +133,12 @@ bool Hand<Card_type>::erase(Card& card)
 template<class Card_type>
 void Hand<Card_type>::analize_hand()
 {
-    // Sort the cards, so it's easier to analize its combo
+    // Sort the cards, so it's easier to analize its combo and display
     std::sort(m_cards.begin(), m_cards.end(), std::less<>{});
 
     Card& card_1 = m_cards[0];
     Card& card_2 = m_cards[1];
     Card& card_3 = m_cards[2];
-
-    // Because is sorted, this will always be the highest
 
     // Check for Casa Grande (1, 12, 12)
     if (is_allowed(Combo::Casa_grande) && card_1 == 1 && card_2 == 12 && card_3 == 12){
