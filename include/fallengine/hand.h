@@ -71,16 +71,10 @@ public:
         return m_cards[index];
     }
 
-    int highest_card() const
-    {
-        return m_highest_card;
-    }
-
     void reset()
     {
         m_cards.clear();
         m_combo = Combo::None;
-        m_highest_card = 1;
         m_combo_name = "";
     }
 
@@ -95,13 +89,12 @@ public:
     }
 private:
     // Private method that is for especific use by set_cards, sets members
-    // combo, highest_cards and combo_name
+    // combo and combo_name
     void analize_hand();
     bool is_allowed(Combo combo);
 
     std::vector<Card_type> m_cards = {};
     Combo m_combo = Combo::None;
-    int m_highest_card = 1;
     std::string m_combo_name = "";
     std::array<bool, 12 /*number of combos*/> m_allowed_combos;
 };
@@ -148,8 +141,6 @@ void Hand<Card_type>::analize_hand()
     Card& card_3 = m_cards[2];
 
     // Because is sorted, this will always be the highest
-
-    m_highest_card = m_cards[2].value();
 
     // Check for Casa Grande (1, 12, 12)
     if (is_allowed(Combo::Casa_grande) && card_1 == 1 && card_2 == 12 && card_3 == 12){
