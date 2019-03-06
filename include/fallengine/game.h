@@ -313,7 +313,7 @@ Game<Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count
 {
     if (!m_is_playing){throw Op_not_valid_currently_exception("step", true);}
     State ret;
-    if (!(m_last_game_state.waiting_next_round)){
+    if (!(m_last_game_state.waiting_next_round || m_last_game_state.winner_found)){
         // play cards, branch if caida happened
         auto[caida, valid] = m_current_player->play_cards(!(m_table.is_deck_empty()));
 
@@ -336,7 +336,17 @@ Game<Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count
                     player.reset_hand();
                 }
                 m_table.deal(m_players.begin(), m_players.end());
+                
 
+                for (auto& player: m_players){
+                    auto& cards = player.get_cards();
+                    if (cards[0] == 12 && cards[1] == 12 && cards[2] == 12){
+                        // If a player, after a deal, has three 12's, wins
+                        player.increase_score(24);
+                        ret.waiting_next_round = true;
+                        break;
+                    }
+                }
                 // set the player with the greatest combo, only it will get the bonus
                 // from his combo
                 set_best_combo_player();
@@ -394,11 +404,35 @@ Game<Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count
 
             m_table.deal(m_players.begin(), m_players.end());
 
+            for (auto& player: m_players){
+                auto& cards = player.get_cards();
+                if (cards[0] == 12 && cards[1] == 12 && cards[2] == 12){
+                    // If a player, after a deal, has three 12's, wins
+                    player.increase_score(24);
+                    break;
+                }
+            }
+
             set_best_combo_player();
             m_last_grab_player = nullptr;
+            
+            
+            for (auto& player: m_players){
+                if (player.is_winner()){
+                    ret.winner_found = true;
+                    break;
+                }
+            }
 
+            if (!ret.winner_found){
+                ret.waiting_next_round = false;
+            }
+            else {
+                ret.waiting_next_round = true;
+            }
+            
         }
-        ret.waiting_next_round = false;
+
     }
     m_last_game_state = ret;
     return ret;
