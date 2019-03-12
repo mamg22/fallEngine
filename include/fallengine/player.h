@@ -121,11 +121,6 @@ public:
         return m_hand.combo_name();
     }
 
-    int get_highest_card() const
-    {
-        return m_hand.highest_card();
-    }
-
     int id() const
     {
         return m_id;
