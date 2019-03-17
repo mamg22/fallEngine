@@ -13,10 +13,9 @@ template<class Game_type>
 class Fespar {
 public:
     Fespar(Game_type& game);
-    // El constructor incluye en op_codes las funciones básicas definidas en commands.txt
     int exec_op(std::vector<std::string> ops);
     bool add_op(std::string op, std::function<int(std::vector<std::string>)> action);
-    bool mod_op(); // 
+    bool mod_op(std::string op, std::function<int(std::vector<std::string>)> action);
 private:
     std::map<std::string, std::function<int(std::vector<std::string>)>> m_op_codes;
     Game_type& m_game;
@@ -26,7 +25,7 @@ template<class Game_type>
 Fespar<Game_type>::Fespar(Game_type& game)
     : m_game(game)
 {
-    m_op_codes["Gap"] = [&](std::vector<std::string>){m_game.add_player();return 0;};
+    // User needs to provide the Add_player action to the list
     m_op_codes["Gop"] = [&](std::vector<std::string> args){m_game.order_players(std::stoi(args[0]));return 0;};
     m_op_codes["Gsp"] = [&](std::vector<std::string> args){m_game.shuffle_players();return 0;};
     m_op_codes["Gi"] = [&](std::vector<std::string> args){m_game.init_game();return 0;};
@@ -122,6 +121,18 @@ template<class Game_type>
 bool Fespar<Game_type>::add_op(std::string op, std::function<int(std::vector<std::string>)> action)
 {
     return (m_op_codes.insert(std::pair(op, action))).second;
+}
+
+template<class Game_type>
+bool Fespar<Game_type>::mod_op(std::string op, std::function<int (std::vector<std::string>)> action)
+{
+    if (m_op_codes.find(op) != m_op_codes.end()){
+        m_op_codes[op] = action;
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 #endif // FESPAR_H_INCLUDED

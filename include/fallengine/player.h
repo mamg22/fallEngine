@@ -15,7 +15,7 @@
 class Null_partner_exception : public std::exception {
 public:
     virtual const char * what() const noexcept {
-        return "Used a player's partner when it has not been set (null partner), partner is requiered for"
+        return "Used a player's partner when it has not been set (null partner), partner is requiered for "
                "Teamed Players, not required for Non-teamed Players";
     }
 };
@@ -116,7 +116,7 @@ public:
         return m_hand.combo();
     }
 
-    std::string get_combo_name() const
+    const std::string& get_combo_name() const
     {
         return m_hand.combo_name();
     }
@@ -125,8 +125,8 @@ public:
     {
         return m_id;
     }
-
-    Player<Card_type>& get_partner()
+    
+    virtual Player<Card_type>& get_partner()
     {
         if (m_teamed){
             if (m_partner){
@@ -140,6 +140,7 @@ public:
             return *this;
         }
     }
+
     
 protected:
     void increase_score_this_only(int increase)
@@ -292,12 +293,10 @@ void Player<Card_type>::increase_score(int increment)
             m_partner->increase_score_this_only(increment);
         }
         else {
-            // THROW AN EXCEPTION BECAUSE THE USER OF THIS LIBRARY WON'T INIT THE PARTNER
+            // Not initialized partner
             throw Null_partner_exception();
         }
     }
 }
-
-
 
 #endif // PLAYER_H_INCLUDED

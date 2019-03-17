@@ -56,7 +56,7 @@ std::vector<std::string> split(const std::string& s, char delimiter)
    return tokens;
 }
 
-bool y_n_ask(auto prompt)
+bool y_n_ask(std::string prompt)
 {
     char choice = 'n';
     std::cout << prompt << " [y/n]: ";
@@ -64,6 +64,27 @@ bool y_n_ask(auto prompt)
     if (choice == 'y' || choice == 'Y'){return true;}
     return false;
 }
+
+template <class Card_type>
+class Neo_player : public Player<Card_type> {
+public:
+    Neo_player(bool teamed, int id, Table<Card_type>& current_table, std::array<bool, 12> allowed_combos, std::string name)
+        : Player<Card_type>(teamed, id, current_table, allowed_combos), m_name(name)
+    {}
+
+    virtual Neo_player<Card_type>& get_partner()
+    {
+        return dynamic_cast<Neo_player<Card_type>&>(get_partner());
+    }
+
+    const std::string& get_name()
+    {
+        return m_name;
+    }
+    
+private:
+    std::string m_name;
+};
 
 int main()
 {
@@ -87,8 +108,10 @@ int main()
         combos[11] = true;
     }
     
-    Game<Card, Player<Card>, Table<Card>, decltype(eng)> game(eng, teamed, combos);
+    Game<Card, Neo_player<Card>, Table<Card>, decltype(eng)> game(eng, teamed, combos);
     Fespar<decltype(game)> fes(game);
+
+    fes.add_op("Gap", [&](std::vector<std::string> args){game.add_player(args[0]); return 0;});
 
     std::string line;
     std::string arg;
