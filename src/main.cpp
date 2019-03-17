@@ -31,7 +31,7 @@ void print_state(Game_type& game)
     std::cout << "\n\n";
     for (auto& player : game.get_players()){
         std::cout << "Player: " << player.id() << "\t S: " << player.get_score() << "\t CCnt: " << player.get_cards_accumulated()
-         << "\t Combo:" << player.get_combo_name() << '\n';
+         << "\tName: " << player.get_name() << "\t Combo:" << player.get_combo_name() << '\n';
         for (auto& card : player.get_cards()){
             std::cout << card.value() << ' ' << static_cast<char>(static_cast<int>(card.suit())+0x40) << " \t";
         }
@@ -72,6 +72,7 @@ public:
         : Player<Card_type>(teamed, id, current_table, allowed_combos), m_name(name)
     {}
 
+    // Required boilerplate, I want a way to avoid this
     virtual Neo_player<Card_type>& get_partner()
     {
         return dynamic_cast<Neo_player<Card_type>&>(get_partner());
@@ -81,7 +82,6 @@ public:
     {
         return m_name;
     }
-    
 private:
     std::string m_name;
 };
@@ -111,7 +111,7 @@ int main()
     Game<Card, Neo_player<Card>, Table<Card>, decltype(eng)> game(eng, teamed, combos);
     Fespar<decltype(game)> fes(game);
 
-    fes.add_op("Gap", [&](std::vector<std::string> args){game.add_player(args[0]); return 0;});
+    fes.add_op("Gap", [&](std::vector<std::string> args){args.empty() ? game.add_player("None") : game.add_player(args[0]); return 0;});
 
     std::string line;
     std::string arg;
@@ -120,11 +120,8 @@ int main()
     print_state(game);
     std::cin.ignore(256, '\n');
     // TODO: open argv[1] as file, then pass argv[2] as (w)record or (r)replay
-    
-   
 
     while (std::getline(std::cin, line, '\n')){
-        // write line to file
         std::istringstream sline(line);
         while (sline >> arg){
             arguments.push_back(arg);
