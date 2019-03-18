@@ -31,7 +31,7 @@ void print_state(Game_type& game)
     std::cout << "\n\n";
     for (auto& player : game.get_players()){
         std::cout << "Player: " << player.id() << "\t S: " << player.get_score() << "\t CCnt: " << player.get_cards_accumulated()
-         << "\tName: " << player.get_name() << "\t Combo:" << player.get_combo_name() << '\n';
+         << /*"\tName: " << player.get_name() <<*/ "\t Combo:" << player.get_combo_name() << '\n';
         for (auto& card : player.get_cards()){
             std::cout << card.value() << ' ' << static_cast<char>(static_cast<int>(card.suit())+0x40) << " \t";
         }
@@ -108,10 +108,11 @@ int main()
         combos[11] = true;
     }
     
-    Game<Card, Neo_player<Card>, Table<Card>, decltype(eng)> game(eng, teamed, combos);
+    Game<Card, Player<Card>, Table<Card>, decltype(eng)> game(eng, teamed, combos);
     Fespar<decltype(game)> fes(game);
-
-    fes.add_op("Gap", [&](std::vector<std::string> args){args.empty() ? game.add_player("None") : game.add_player(args[0]); return 0;});
+    
+    fes.add_op("Gap", [&](std::vector<std::string> args){game.add_player();return 0;});
+    //fes.add_op("Gap", [&](std::vector<std::string> args){args.empty() ? game.add_player("None") : game.add_player(args[0]); return 0;});
 
     std::string line;
     std::string arg;

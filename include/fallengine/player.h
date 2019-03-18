@@ -20,14 +20,14 @@ public:
     }
 };
 
-template<class Card_type>
-class Player {
+template<class Card_type, class This_classname>
+class Base_player {
 public:
-    Player(bool teamed, int id, Table<Card_type>& current_table, Combo max_combo = Combo::Registro)
+    Base_player(bool teamed, int id, Table<Card_type>& current_table, Combo max_combo = Combo::Registro)
         : m_current_table(current_table), m_hand(max_combo), m_id(id), m_teamed(teamed)
     {
     }
-    Player(bool teamed, int id, Table<Card_type>& current_table, std::array<bool, 12> allowed_combos)
+    Base_player(bool teamed, int id, Table<Card_type>& current_table, std::array<bool, 12> allowed_combos)
         : m_current_table(current_table), m_hand(allowed_combos), m_id(id), m_teamed(teamed) 
     {
     }
@@ -91,7 +91,7 @@ public:
     template<class FWIterator>
     void set_cards(FWIterator begin, FWIterator end);
 
-    void set_partner(Player<Card_type>& partner)
+    void set_partner(This_classname& partner)
     {
         m_partner = &partner;
     }
@@ -126,7 +126,7 @@ public:
         return m_id;
     }
     
-    virtual Player<Card_type>& get_partner()
+    virtual This_classname& get_partner()
     {
         if (m_teamed){
             if (m_partner){
@@ -162,19 +162,19 @@ private:
     int m_id = 0;
     bool m_teamed;
 
-    Player<Card_type>* m_partner = nullptr;
+    This_classname* m_partner = nullptr;
 };
 
 
-template<class Card_type>
+template<class Card_type, class This_classname>
 template<class FWIterator>
-void Player<Card_type>::set_cards(FWIterator begin, FWIterator end)
+void Base_player<Card_type, This_classname>::set_cards(FWIterator begin, FWIterator end)
 {
     m_hand.set_cards(begin, end);
 }
 
-template<class Card_type>
-bool Player<Card_type>::select(Card_type& card)
+template<class Card_type, class This_classname>
+bool Base_player<Card_type, This_classname>::select(Card_type& card)
 {
     Card dummy(-1);
     Card_type* prev_select = &dummy;
@@ -206,21 +206,21 @@ bool Player<Card_type>::select(Card_type& card)
     }
 }
 
-template<class Card_type>
-void Player<Card_type>::reset_hand()
+template<class Card_type, class This_classname>
+void Base_player<Card_type, This_classname>::reset_hand()
 {
     m_selection.clear();
     m_hand.reset();
 }
-template<class Card_type>
-void Player<Card_type>::reset_state()
+template<class Card_type, class This_classname>
+void Base_player<Card_type, This_classname>::reset_state()
 {
     m_cards_accumulated = 0;
     reset_hand();
 }
 
-template<class Card_type>
-void Player<Card_type>::count_cards(int base)
+template<class Card_type, class This_classname>
+void Base_player<Card_type, This_classname>::count_cards(int base)
 {
     if (m_teamed){
         increase_score(std::max((m_cards_accumulated + m_partner->get_cards_accumulated()) - base, 0));
@@ -230,8 +230,8 @@ void Player<Card_type>::count_cards(int base)
     }
 }
 
-template<class Card_type>
-std::pair<bool, bool> Player<Card_type>::play_cards(bool caida_enabled)
+template<class Card_type, class This_classname>
+std::pair<bool, bool> Base_player<Card_type, This_classname>::play_cards(bool caida_enabled)
 {
     auto select_beg = m_selection.begin();
     auto select_end = m_selection.end();
@@ -281,8 +281,8 @@ std::pair<bool, bool> Player<Card_type>::play_cards(bool caida_enabled)
     return {has_caida, true};
 }
 
-template<class Card_type>
-void Player<Card_type>::increase_score(int increment)
+template<class Card_type, class This_classname>
+void Base_player<Card_type, This_classname>::increase_score(int increment)
 {
     if (!m_teamed){
         m_score += increment;
@@ -298,5 +298,10 @@ void Player<Card_type>::increase_score(int increment)
         }
     }
 }
+
+template<class Card_type>
+class Player : public Base_player<Card_type, Player<Card_type>> {
+
+};
 
 #endif // PLAYER_H_INCLUDED
