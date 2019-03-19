@@ -126,7 +126,7 @@ public:
         return m_id;
     }
     
-    virtual This_classname& get_partner()
+    This_classname& get_partner()
     {
         if (m_teamed){
             if (m_partner){
@@ -137,7 +137,7 @@ public:
             }
         }
         else {
-            return *this;
+            return *static_cast<This_classname*>(this);
         }
     }
 
@@ -301,7 +301,8 @@ void Base_player<Card_type, This_classname>::increase_score(int increment)
 
 template<class Card_type>
 class Player : public Base_player<Card_type, Player<Card_type>> {
-
+public:
+    using Base_player<Card_type, Player>::Base_player;
 };
 
 #endif // PLAYER_H_INCLUDED

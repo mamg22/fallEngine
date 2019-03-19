@@ -66,17 +66,11 @@ bool y_n_ask(std::string prompt)
 }
 
 template <class Card_type>
-class Neo_player : public Player<Card_type> {
+class Neo_player : public Base_player<Card_type, Neo_player<Card_type>> {
 public:
     Neo_player(bool teamed, int id, Table<Card_type>& current_table, std::array<bool, 12> allowed_combos, std::string name)
-        : Player<Card_type>(teamed, id, current_table, allowed_combos), m_name(name)
+        : Base_player<Card_type, Neo_player>(teamed, id, current_table, allowed_combos), m_name(name)
     {}
-
-    // Required boilerplate, I want a way to avoid this
-    virtual Neo_player<Card_type>& get_partner()
-    {
-        return dynamic_cast<Neo_player<Card_type>&>(get_partner());
-    }
 
     const std::string& get_name()
     {
@@ -108,11 +102,11 @@ int main()
         combos[11] = true;
     }
     
-    Game<Card, Player<Card>, Table<Card>, decltype(eng)> game(eng, teamed, combos);
+    Game<Card, Neo_player<Card>, Table<Card>, decltype(eng)> game(eng, teamed, combos);
     Fespar<decltype(game)> fes(game);
     
-    fes.add_op("Gap", [&](std::vector<std::string> args){game.add_player();return 0;});
-    //fes.add_op("Gap", [&](std::vector<std::string> args){args.empty() ? game.add_player("None") : game.add_player(args[0]); return 0;});
+    //fes.add_op("Gap", [&](std::vector<std::string> args){game.add_player();return 0;});
+    fes.add_op("Gap", [&](std::vector<std::string> args){args.empty() ? game.add_player("None") : game.add_player(args[0]); return 0;});
 
     std::string line;
     std::string arg;
