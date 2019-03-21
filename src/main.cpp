@@ -109,6 +109,28 @@ private:
     std::string m_name;
 };
 
+
+template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+class Neo_game : public Game<Card_type, Player_type, Table_type, Uniform_random_engine> {
+public:
+    Neo_game(Uniform_random_engine& random_engine, bool teamed, Combo max_combo_allowed, const std::string& color)
+        : Game<Card_type, Player_type, Table_type, Uniform_random_engine>(random_engine, teamed, max_combo_allowed)
+        , m_color(color)
+    {}
+    
+    Neo_game(Uniform_random_engine& random_engine, bool teamed, std::array<bool, 12> max_combo_allowed, const std::string& color)
+        : Game<Card_type, Player_type, Table_type, Uniform_random_engine>(random_engine, teamed, max_combo_allowed)
+        , m_color(color)
+    {}
+
+    std::string& get_color()
+    {
+        return m_color;
+    }
+private:
+    std::string m_color = "\033[34m";
+};
+
 int main()
 {
     int round = 0;
@@ -131,7 +153,7 @@ int main()
         combos[11] = true;
     }
     
-    Game<Neo_card, Neo_player<Neo_card>, Neo_table<Neo_card>, decltype(eng)> game(eng, teamed, combos);
+    Neo_game<Neo_card, Neo_player<Neo_card>, Neo_table<Neo_card>, decltype(eng)> game(eng, teamed, combos, "\033[36m");
     Fespar<decltype(game)> fes(game);
     
     //fes.add_op("Gap", [&](std::vector<std::string> args){game.add_player();return 0;});

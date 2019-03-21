@@ -41,7 +41,7 @@ private:
 template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
 class Game {
 public:
-    explicit Game(Uniform_random_engine& random_engine, bool teamed, Combo max_combo_allowed = Combo::Registro)
+    explicit Game(Uniform_random_engine& random_engine, bool teamed, Combo max_combo_allowed)
         : m_random_engine(random_engine), m_is_teamed(teamed)
     {
         // fill cards from which table should copy
