@@ -63,8 +63,6 @@ public:
         }
     }
 
-    virtual ~Game() = default;
-
     struct State {
         bool caida = false; // Player picked the card the previous player just placed, bonus points
         bool waiting_next_round = false; // No cards left in neither player's hands or table, new round should begin,
