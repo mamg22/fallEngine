@@ -10,6 +10,7 @@
 
 /* TODO: Find a way to record a game and replay it given a file, because repeating it is annoying (see notes)
  */
+
 template<class Game_type>
 void report_round(int& round, Game_type& game)
 {
@@ -19,6 +20,7 @@ void report_round(int& round, Game_type& game)
     "CP: " << game.current_player().id() << " DP: " << game.dealer().id() << " BC: " << game.best_combo_p().id() << "\n\n";
 }
 
+
 template<class Game_type>
 void print_state(Game_type& game)
 {
@@ -26,15 +28,16 @@ void print_state(Game_type& game)
     try {game.current_player();} catch (Player_not_found_exception& e){return;}
     std::cout << "Table: ";
     for (auto& card : game.get_table_cards()){
-        std::cout << card.value() << ' ' << static_cast<char>(static_cast<int>(card.suit())+0x40) << " \t" ;
+        std::cout << card.get_color() << card.value() << ' ' << static_cast<char>(static_cast<int>(card.suit())+0x40) << " \t" ;
     }
     std::cout << "\n\n";
     for (auto& player : game.get_players()){
         std::cout << "Player: " << player.id() << "\t S: " << player.get_score() << "\t CCnt: " << player.get_cards_accumulated()
-         << /*"\tName: " << player.get_name() <<*/ "\t Combo:" << player.get_combo_name() << '\n';
+         << "\tName: " << player.get_name() << "\t Combo:" << player.get_combo_name() << '\n';
         for (auto& card : player.get_cards()){
             std::cout << card.value() << ' ' << static_cast<char>(static_cast<int>(card.suit())+0x40) << " \t";
         }
+
         std::cout << "\n\n";
     }
     std::cout << "CP-Sel: ";
@@ -61,9 +64,35 @@ bool y_n_ask(std::string prompt)
     char choice = 'n';
     std::cout << prompt << " [y/n]: ";
     std::cin >> choice;
-    if (choice == 'y' || choice == 'Y'){return true;}
-    return false;
+    return choice == 'y' || choice == 'Y';
 }
+
+class Neo_card : public Card {
+public:
+    using Card::Card;
+    std::string& get_color()
+    {
+        return m_color;
+    }
+private:
+    std::string m_color = "\033[32m";
+};
+
+template<class Card_type>
+class Neo_table : public Table<Card_type> {
+public:
+    using Table<Card_type>::Table;
+    void set_color(std::string& color)
+    {
+        m_color = color;
+    }
+    std::string& get_color()
+    {
+        return m_color;
+    }
+private:
+    std::string m_color;
+};
 
 template <class Card_type>
 class Neo_player : public Base_player<Card_type, Neo_player<Card_type>> {
@@ -102,7 +131,7 @@ int main()
         combos[11] = true;
     }
     
-    Game<Card, Neo_player<Card>, Table<Card>, decltype(eng)> game(eng, teamed, combos);
+    Game<Neo_card, Neo_player<Neo_card>, Neo_table<Neo_card>, decltype(eng)> game(eng, teamed, combos);
     Fespar<decltype(game)> fes(game);
     
     //fes.add_op("Gap", [&](std::vector<std::string> args){game.add_player();return 0;});

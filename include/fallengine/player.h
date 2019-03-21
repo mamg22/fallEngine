@@ -176,7 +176,7 @@ void Base_player<Card_type, This_classname>::set_cards(FWIterator begin, FWItera
 template<class Card_type, class This_classname>
 bool Base_player<Card_type, This_classname>::select(Card_type& card)
 {
-    Card dummy(-1);
+    Card_type dummy(-1);
     Card_type* prev_select = &dummy;
     if (m_selection.size() > 0){
         prev_select = &last_selection();
@@ -185,7 +185,7 @@ bool Base_player<Card_type, This_classname>::select(Card_type& card)
     auto hand_begin = m_hand.get_cards().begin();
     auto hand_end = m_hand.get_cards().end();
 
-    bool in_hand = (std::find_if(hand_begin, hand_end, [&](Card& other){
+    bool in_hand = (std::find_if(hand_begin, hand_end, [&](auto& other){
                                                            return is_same_card(card, other);
                                                        }) != hand_end);
     // Only add if:
@@ -236,7 +236,7 @@ std::pair<bool, bool> Base_player<Card_type, This_classname>::play_cards(bool ca
     auto select_beg = m_selection.begin();
     auto select_end = m_selection.end();
 
-    std::vector<Card> selection_cp(select_beg, select_end);
+    std::vector<Card_type> selection_cp(select_beg, select_end);
 
     auto& table_cards = m_current_table.get().get_table_cards();
 

@@ -47,7 +47,7 @@ public:
         // fill cards from which table should copy
         for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
             for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas, Suit::Oros}){
-                m_cards.push_back(Card_type(val, suit));
+                m_cards.emplace_back(val, suit);
             }
         }
         std::fill_n(m_allowed_combos.begin(), static_cast<int>(max_combo_allowed), true);
@@ -58,7 +58,7 @@ public:
         // fill cards from which table should copy
         for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
             for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas, Suit::Oros}){
-                m_cards.push_back(Card_type(val, suit));
+                m_cards.emplace_back(val, suit);
             }
         }
     }
@@ -143,6 +143,11 @@ public:
         return m_table.get_table_cards();
     }
     
+    Table_type& get_table()
+    {
+        return m_table;
+    }
+
     bool is_playing()
     {
         return m_is_playing;
