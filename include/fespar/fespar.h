@@ -13,11 +13,12 @@ template<class Game_type>
 class Fespar {
 public:
     Fespar(Game_type& game);
-    int exec_op(std::vector<std::string> ops);
-    bool add_op(std::string op, std::function<int(std::vector<std::string>)> action);
-    bool mod_op(std::string op, std::function<int(std::vector<std::string>)> action);
+    int exec_op(std::vector<std::string>& ops);
+    bool add_op(const std::string& op, std::function<int(std::vector<std::string>&)> action);
+    bool mod_op(const std::string& op, std::function<int(std::vector<std::string>&)> action);
+    void useargs(std::vector<std::string>& args){args.size();}
 private:
-    std::map<std::string, std::function<int(std::vector<std::string>)>> m_op_codes;
+    std::map<std::string, std::function<int(std::vector<std::string>&)>> m_op_codes;
     Game_type& m_game;
 };
 
@@ -26,11 +27,11 @@ Fespar<Game_type>::Fespar(Game_type& game)
     : m_game(game)
 {
     // User needs to provide the Add_player action to the list
-    m_op_codes["Gop"] = [&](std::vector<std::string> args){m_game.order_players(std::stoi(args[0]));return 0;};
-    m_op_codes["Gsp"] = [&](std::vector<std::string> args){m_game.shuffle_players();return 0;};
-    m_op_codes["Gi"] = [&](std::vector<std::string> args){m_game.init_game();return 0;};
-    m_op_codes["Grp"] = [&](std::vector<std::string> data){game.remove_player(std::stoi(data[0]));return 0;}; 
-    m_op_codes["Psp"] = [&](std::vector<std::string> args){
+    m_op_codes["Gop"] = [&](std::vector<std::string>& args){m_game.order_players(std::stoi(args[0]));return 0;};
+    m_op_codes["Gsp"] = [&](std::vector<std::string>& args){m_game.shuffle_players();useargs(args);return 0;};
+    m_op_codes["Gi"] = [&](std::vector<std::string>& args){m_game.init_game();useargs(args);return 0;};
+    m_op_codes["Grp"] = [&](std::vector<std::string>& data){game.remove_player(std::stoi(data[0]));return 0;}; 
+    m_op_codes["Psp"] = [&](std::vector<std::string>& args){
         try {
             auto& target = m_game.get_player(std::stoi(args[0]));
             auto& partner = m_game.get_player(std::stoi(args[1])); 
@@ -48,7 +49,7 @@ Fespar<Game_type>::Fespar(Game_type& game)
             return 3;
         }
     };
-    m_op_codes["psh"] = [&](std::vector<std::string> args){
+    m_op_codes["psh"] = [&](std::vector<std::string>& args){
         try {
             auto& current = m_game.current_player();
             if (current.select(current.get_cards()[std::stoi(args[0])])){
@@ -65,7 +66,7 @@ Fespar<Game_type>::Fespar(Game_type& game)
             return 3;
         }
     };
-    m_op_codes["pst"] = [&](std::vector<std::string> args){
+    m_op_codes["pst"] = [&](std::vector<std::string>& args){
         try {
             auto& current = m_game.current_player();
             auto& target_card = m_game.get_table_cards()[std::stoi(args[0])];
@@ -83,9 +84,9 @@ Fespar<Game_type>::Fespar(Game_type& game)
             return 3;
         }
     };
-    m_op_codes["psu"] = [&](std::vector<std::string> args){m_game.current_player().undo_select();return 0;};
-    m_op_codes["psc"] = [&](std::vector<std::string> args){m_game.current_player().reset_selection();return 0;};
-    m_op_codes["gs"] = [&](std::vector<std::string> args){
+    m_op_codes["psu"] = [&](std::vector<std::string>& args){m_game.current_player().undo_select();useargs(args);return 0;};
+    m_op_codes["psc"] = [&](std::vector<std::string>& args){m_game.current_player().reset_selection();useargs(args);return 0;};
+    m_op_codes["gs"] = [&](std::vector<std::string>& args){
         if (args.size() < 1){
             m_game.step(0);
         }
@@ -98,12 +99,13 @@ Fespar<Game_type>::Fespar(Game_type& game)
 
 
 template<class Game_type>
-int Fespar<Game_type>::exec_op(std::vector<std::string> ops)
+int Fespar<Game_type>::exec_op(std::vector<std::string>& ops)
 {
     if (ops.size() == 0){return -2;};
     auto& opcode = ops[0];
     if (m_op_codes.find(opcode) != m_op_codes.end()){
-        return m_op_codes[opcode](std::vector<std::string>(ops.begin()+1, ops.end()));
+        std::vector<std::string> args(ops.begin()+1, ops.end());
+        return m_op_codes[opcode](args);
     }
     else {
         std::cout << "OP not found\n";
@@ -118,13 +120,13 @@ int Fespar<Game_type>::exec_op(std::vector<std::string> ops)
 }
 
 template<class Game_type>
-bool Fespar<Game_type>::add_op(std::string op, std::function<int(std::vector<std::string>)> action)
+bool Fespar<Game_type>::add_op(const std::string& op, std::function<int(std::vector<std::string>&)> action)
 {
     return (m_op_codes.insert(std::pair(op, action))).second;
 }
 
 template<class Game_type>
-bool Fespar<Game_type>::mod_op(std::string op, std::function<int (std::vector<std::string>)> action)
+bool Fespar<Game_type>::mod_op(const std::string& op, std::function<int (std::vector<std::string>&)> action)
 {
     if (m_op_codes.find(op) != m_op_codes.end()){
         m_op_codes[op] = action;

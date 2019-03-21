@@ -135,7 +135,7 @@ int main()
     Fespar<decltype(game)> fes(game);
     
     //fes.add_op("Gap", [&](std::vector<std::string> args){game.add_player();return 0;});
-    fes.add_op("Gap", [&](std::vector<std::string> args){args.empty() ? game.add_player("None") : game.add_player(args[0]); return 0;});
+    fes.add_op("Gap", [&](std::vector<std::string>& args){args.empty() ? game.add_player("None") : game.add_player(args[0]); return 0;});
 
     std::string line;
     std::string arg;
