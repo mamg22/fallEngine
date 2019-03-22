@@ -44,23 +44,13 @@ public:
     explicit Game(Uniform_random_engine& random_engine, bool teamed, Combo max_combo_allowed)
         : m_random_engine(random_engine), m_is_teamed(teamed)
     {
-        // fill cards from which table should copy
-        for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
-            for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas, Suit::Oros}){
-                m_cards.emplace_back(val, suit);
-            }
-        }
+        fill_cards();
         std::fill_n(m_allowed_combos.begin(), static_cast<int>(max_combo_allowed), true);
     }
     explicit Game(Uniform_random_engine& random_engine, bool teamed, std::array<bool, 12> allowed_combos)
         : m_random_engine(random_engine), m_is_teamed(teamed), m_allowed_combos(allowed_combos)
     {
-        // fill cards from which table should copy
-        for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
-            for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas, Suit::Oros}){
-                m_cards.emplace_back(val, suit);
-            }
-        }
+        fill_cards();
     }
 
     struct State {
@@ -159,6 +149,7 @@ private:
     auto rotate_player(Player_type* player, int step);
     void set_best_combo_player();
     void count_cards();
+    void fill_cards();
     Player_type* to_player_ptr(Player_ptr iter)
     {
         return &(*iter);
@@ -501,6 +492,16 @@ void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::set_best_c
     }
 }
 
+template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::fill_cards()
+{
+    // fill cards from which table should copy
+    for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){
+        for (auto& suit : {Suit::Bastos, Suit::Copas, Suit::Espadas, Suit::Oros}){
+            m_cards.emplace_back(val, suit);
+        }
+    }
+}
 // End of Game methods
 
 
