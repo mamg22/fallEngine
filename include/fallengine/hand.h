@@ -28,9 +28,6 @@ enum class Combo {
 template<class Card_type>
 class Hand {
 public:
-
-
-
     Hand(Combo max_combo_allowed = Combo::Registro)
     {
         // Allow combos below and including the specified
@@ -42,10 +39,6 @@ public:
     {
     }
 
-    Hand<Card_type>& operator=(Hand<Card_type>&& other) = default;
-    Hand(Hand<Card_type>& other) = default;
-    Hand<Card_type>& operator=(Hand<Card_type>& other) = default;
-    Hand(Hand<Card_type>&& other) = default;
     // Takes a iterator pair to the cards in the deck to be set here, an calls
     // analize_hand at the end
     template<class FWIterator>
