@@ -12,6 +12,8 @@
 #include "hand.h"
 #include "table.h"
 
+//TODO: Remove m_current_table and make it a parameter
+
 class Null_partner_exception : public std::exception {
 public:
     virtual const char * what() const noexcept {

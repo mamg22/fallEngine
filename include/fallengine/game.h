@@ -38,17 +38,17 @@ private:
     std::string text;
 };
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+template<class Card_type, class Player_type, class Table_type>
 class Game {
 public:
-    explicit Game(Uniform_random_engine& random_engine, bool teamed, Combo max_combo_allowed)
-        : m_random_engine(random_engine), m_is_teamed(teamed)
+    explicit Game(bool teamed, Combo max_combo_allowed)
+        : m_is_teamed(teamed)
     {
         fill_cards();
         std::fill_n(m_allowed_combos.begin(), static_cast<int>(max_combo_allowed), true);
     }
-    explicit Game(Uniform_random_engine& random_engine, bool teamed, std::array<bool, 12> allowed_combos)
-        : m_random_engine(random_engine), m_is_teamed(teamed), m_allowed_combos(allowed_combos)
+    explicit Game(bool teamed, std::array<bool, 12> allowed_combos)
+        : m_is_teamed(teamed), m_allowed_combos(allowed_combos)
     {
         fill_cards();
     }
@@ -71,13 +71,15 @@ public:
 
     bool remove_player(int id);
 
-    State step(bool count_from_4 = false); // count_from_4 only used when Waiting_next_round was returned before
+    template<class Uniform_random_engine>
+    State step(Uniform_random_engine&& random_engine, bool count_from_4 = false); // count_from_4 only used when Waiting_next_round was returned before
 
     std::vector<std::reference_wrapper<Player_type>> find_winners();
 
     void order_players(int new_first_id);
 
-    void shuffle_players();
+    template<class Uniform_random_engine>
+    void shuffle_players(Uniform_random_engine&& random_engine);
 
     Player_type& current_player()
     {
@@ -163,14 +165,11 @@ private:
     Table_type m_table;
     std::vector<Player_type> m_players;
 
-    // Various player pointers, required for basic game functionality // don't jusge me
+    // Various player pointers, required for basic game functionality 
     Player_type* m_current_player = nullptr;
     Player_type* m_dealer = nullptr;
     Player_type* m_best_combo_player = nullptr;
     Player_type* m_last_grab_player = nullptr;
-
-    Uniform_random_engine& m_random_engine; // User must supply an random engine
-    
 
     bool m_is_playing = false;
     bool m_is_teamed;
@@ -187,8 +186,8 @@ private:
 
 // Game methods
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-auto Game<Card_type, Player_type, Table_type, Uniform_random_engine>::rotate_player(Player_type* player, int step)
+template<class Card_type, class Player_type, class Table_type>
+auto Game<Card_type, Player_type, Table_type>::rotate_player(Player_type* player, int step)
 {
     if (step >= 0){
         while (step--){
@@ -207,15 +206,16 @@ auto Game<Card_type, Player_type, Table_type, Uniform_random_engine>::rotate_pla
     return player;
 }
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::shuffle_players()
+template<class Card_type, class Player_type, class Table_type>
+template<class Uniform_random_engine>
+void Game<Card_type, Player_type, Table_type>::shuffle_players(Uniform_random_engine&& random_engine)
 {
     if (m_is_playing){throw Op_not_valid_currently_exception("shuffle_players", false);}
-    std::shuffle(m_players.begin(), m_players.end(), std::forward<decltype(m_random_engine)>(m_random_engine));
+    std::shuffle(m_players.begin(), m_players.end(), std::forward<Uniform_random_engine>(random_engine));
 }
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::order_players(int new_first_id)
+template<class Card_type, class Player_type, class Table_type>
+void Game<Card_type, Player_type, Table_type>::order_players(int new_first_id)
 {
     if (m_is_playing){throw Op_not_valid_currently_exception("order_players", false);}
     auto new_first = std::find_if(m_players.begin(), m_players.end(), [&](Player_type& player){
@@ -231,8 +231,8 @@ void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::order_play
 
 }
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-std::vector<std::reference_wrapper<Player_type>> Game<Card_type, Player_type, Table_type, Uniform_random_engine>::find_winners() 
+template<class Card_type, class Player_type, class Table_type>
+std::vector<std::reference_wrapper<Player_type>> Game<Card_type, Player_type, Table_type>::find_winners() 
 {
     if (!m_is_playing){throw Op_not_valid_currently_exception("find_winners", true);}
     std::vector<std::reference_wrapper<Player_type>> ret{};
@@ -244,8 +244,8 @@ std::vector<std::reference_wrapper<Player_type>> Game<Card_type, Player_type, Ta
     return ret;
 }
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-bool Game<Card_type, Player_type, Table_type, Uniform_random_engine>::init_game()
+template<class Card_type, class Player_type, class Table_type>
+bool Game<Card_type, Player_type, Table_type>::init_game()
 {
     if (m_is_playing){throw Op_not_valid_currently_exception("init_game", false);}
     constexpr int cards_in_deck_after_deal = 36;
@@ -278,16 +278,16 @@ bool Game<Card_type, Player_type, Table_type, Uniform_random_engine>::init_game(
     }
 }
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
+template<class Card_type, class Player_type, class Table_type>
 template<class... Args>
-void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::add_player(Args... args)
+void Game<Card_type, Player_type, Table_type>::add_player(Args... args)
 {
     if (m_is_playing){throw Op_not_valid_currently_exception("add_player", false);}
     m_players.push_back(Player_type(m_is_teamed, m_id_count++, m_table, m_allowed_combos, std::forward<Args>(args)...));
 }
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-bool Game<Card_type, Player_type, Table_type, Uniform_random_engine>::remove_player(int id)
+template<class Card_type, class Player_type, class Table_type>
+bool Game<Card_type, Player_type, Table_type>::remove_player(int id)
 {
     if (m_is_playing){throw Op_not_valid_currently_exception("remove_player", false);}
     if (auto player = std::find_if(m_players.begin(), m_players.end(), [&](Player_type& plyr){
@@ -301,9 +301,10 @@ bool Game<Card_type, Player_type, Table_type, Uniform_random_engine>::remove_pla
     }
 }
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-typename Game<Card_type, Player_type, Table_type, Uniform_random_engine>::State
-Game<Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count_from_4)
+template<class Card_type, class Player_type, class Table_type>
+template<class Uniform_random_engine>
+typename Game<Card_type, Player_type, Table_type>::State
+Game<Card_type, Player_type, Table_type>::step(Uniform_random_engine&& random_engine, bool count_from_4)
 {
     if (!m_is_playing){throw Op_not_valid_currently_exception("step", true);}
     State ret;
@@ -386,7 +387,7 @@ Game<Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count
             m_table.set_deck(m_cards.begin(), m_cards.end());
 
 
-            m_table.shuffle_deck(std::forward<decltype(m_random_engine)>(m_random_engine));
+            m_table.shuffle_deck(std::forward<Uniform_random_engine>(random_engine));
 
             if (int match_bonus = m_table.init_round(count_from_4); match_bonus > 0){
                 m_dealer->increase_score(match_bonus);
@@ -432,8 +433,8 @@ Game<Card_type, Player_type, Table_type, Uniform_random_engine>::step(bool count
     return ret;
 }
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::count_cards()
+template<class Card_type, class Player_type, class Table_type>
+void Game<Card_type, Player_type, Table_type>::count_cards()
 {
     
     constexpr int cards_per_deck = 40;
@@ -456,8 +457,8 @@ void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::count_card
     }
 }
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::set_best_combo_player()
+template<class Card_type, class Player_type, class Table_type>
+void Game<Card_type, Player_type, Table_type>::set_best_combo_player()
 {
     int player_count = m_players.size();
     for (auto current = rotate_player(m_dealer, -1);player_count > 0; current = rotate_player(current, -1)){
@@ -492,8 +493,8 @@ void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::set_best_c
     }
 }
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-void Game<Card_type, Player_type, Table_type, Uniform_random_engine>::fill_cards()
+template<class Card_type, class Player_type, class Table_type>
+void Game<Card_type, Player_type, Table_type>::fill_cards()
 {
     // fill cards from which table should copy
     for (auto& val : {1, 2, 3, 4, 5, 6, 7, 10, 11, 12}){

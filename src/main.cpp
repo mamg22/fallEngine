@@ -11,6 +11,9 @@
 /* TODO: Find a way to record a game and replay it given a file, because repeating it is annoying (see notes)
  */
 
+/* Replace m_randeng in Game, and make fespar require a randegn passed to all functions
+ */
+// TODO: FIX EVERYTHING
 template<class Game_type>
 void report_round(int& round, Game_type& game)
 {
@@ -110,16 +113,16 @@ private:
 };
 
 
-template<class Card_type, class Player_type, class Table_type, class Uniform_random_engine>
-class Neo_game : public Game<Card_type, Player_type, Table_type, Uniform_random_engine> {
+template<class Card_type, class Player_type, class Table_type>
+class Neo_game : public Game<Card_type, Player_type, Table_type> {
 public:
-    Neo_game(Uniform_random_engine& random_engine, bool teamed, Combo max_combo_allowed, const std::string& color)
-        : Game<Card_type, Player_type, Table_type, Uniform_random_engine>(random_engine, teamed, max_combo_allowed)
+    Neo_game(bool teamed, Combo max_combo_allowed, const std::string& color)
+        : Game<Card_type, Player_type, Table_type>(teamed, max_combo_allowed)
         , m_color(color)
     {}
     
-    Neo_game(Uniform_random_engine& random_engine, bool teamed, std::array<bool, 12> max_combo_allowed, const std::string& color)
-        : Game<Card_type, Player_type, Table_type, Uniform_random_engine>(random_engine, teamed, max_combo_allowed)
+    Neo_game(bool teamed, std::array<bool, 12> max_combo_allowed, const std::string& color)
+        : Game<Card_type, Player_type, Table_type>(teamed, max_combo_allowed)
         , m_color(color)
     {}
 
@@ -153,10 +156,9 @@ int main()
         combos[11] = true;
     }
     
-    Neo_game<Neo_card, Neo_player<Neo_card>, Neo_table<Neo_card>, decltype(eng)> game(eng, teamed, combos, "\033[36m");
-    Fespar<decltype(game)> fes(game);
+    Neo_game<Neo_card, Neo_player<Neo_card>, Neo_table<Neo_card>> game(teamed, combos, "\033[36m");
+    Fespar<decltype(game), decltype(eng)> fes(game, eng);
     
-    //fes.add_op("Gap", [&](std::vector<std::string> args){game.add_player();return 0;});
     fes.add_op("Gap", [&](std::vector<std::string>& args){args.empty() ? game.add_player("None") : game.add_player(args[0]); return 0;});
 
     std::string line;
