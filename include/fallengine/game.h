@@ -283,7 +283,7 @@ template<class... Args>
 void Game<Card_type, Player_type, Table_type>::add_player(Args... args)
 {
     if (m_is_playing){throw Op_not_valid_currently_exception("add_player", false);}
-    m_players.push_back(Player_type(m_is_teamed, m_id_count++, m_table, m_allowed_combos, std::forward<Args>(args)...));
+    m_players.push_back(Player_type(m_is_teamed, m_id_count++, m_allowed_combos, std::forward<Args>(args)...));
 }
 
 template<class Card_type, class Player_type, class Table_type>
@@ -310,7 +310,7 @@ Game<Card_type, Player_type, Table_type>::step(Uniform_random_engine&& random_en
     State ret;
     if (!(m_last_game_state.waiting_next_round || m_last_game_state.winner_found)){
         // play cards, branch if caida happened
-        auto[caida, valid] = m_current_player->play_cards(!(m_table.is_deck_empty()));
+        auto[caida, valid] = m_current_player->play_cards(m_table,!(m_table.is_deck_empty()));
 
         ret.caida = caida;
         if (valid){

@@ -25,12 +25,12 @@ public:
 template<class Card_type, class This_classname>
 class Base_player {
 public:
-    Base_player(bool teamed, int id, Table<Card_type>& current_table, Combo max_combo = Combo::Registro)
-        : m_current_table(current_table), m_hand(max_combo), m_id(id), m_teamed(teamed)
+    Base_player(bool teamed, int id, Combo max_combo)
+        : m_hand(max_combo), m_id(id), m_teamed(teamed)
     {
     }
-    Base_player(bool teamed, int id, Table<Card_type>& current_table, std::array<bool, 12> allowed_combos)
-        : m_current_table(current_table), m_hand(allowed_combos), m_id(id), m_teamed(teamed) 
+    Base_player(bool teamed, int id, std::array<bool, 12> allowed_combos)
+        : m_hand(allowed_combos), m_id(id), m_teamed(teamed) 
     {
     }
 
@@ -74,7 +74,8 @@ public:
     // First: true if special move "caida" happened, else false
     // Second: false if the played cards weren't valid (e.g. no cards selected,
     //         or selected a own card that is on the table, but didn't select the other, else true
-    std::pair<bool, bool> play_cards(bool caida_enabled = true);
+    template<class Table_type>
+    std::pair<bool, bool> play_cards(Table_type& table, bool caida_enabled = true);
     
     void reset_hand();
     void reset_state();
@@ -155,7 +156,6 @@ protected:
     }
 
 private:
-    std::reference_wrapper<Table<Card_type>> m_current_table;
     std::deque<std::reference_wrapper<Card_type>> m_selection;
     Hand<Card_type> m_hand;
 
@@ -233,18 +233,19 @@ void Base_player<Card_type, This_classname>::count_cards(int base)
 }
 
 template<class Card_type, class This_classname>
-std::pair<bool, bool> Base_player<Card_type, This_classname>::play_cards(bool caida_enabled)
+template<class Table_type>
+std::pair<bool, bool> Base_player<Card_type, This_classname>::play_cards(Table_type& table, bool caida_enabled)
 {
     auto select_beg = m_selection.begin();
     auto select_end = m_selection.end();
 
     std::vector<Card_type> selection_cp(select_beg, select_end);
 
-    auto& table_cards = m_current_table.get().get_table_cards();
+    auto& table_cards = table.get_table_cards();
 
     bool has_caida = false;
 
-    if (caida_enabled && (m_current_table.get().last_card_placed()) && (*(m_current_table.get().last_card_placed()) == m_selection.front().get()))
+    if (caida_enabled && (table.last_card_placed()) && (*(table.last_card_placed()) == m_selection.front().get()))
     {
         has_caida = true;
         if ((1 <= m_selection.front().get()) && (m_selection.front().get() <= 7)){
@@ -266,7 +267,7 @@ std::pair<bool, bool> Base_player<Card_type, This_classname>::play_cards(bool ca
         return {false, false};
     }
 
-    if (m_current_table.get().play_cards(selection_cp.begin(), selection_cp.end())){
+    if (table.play_cards(selection_cp.begin(), selection_cp.end())){
         increase_score(4);
     }
 

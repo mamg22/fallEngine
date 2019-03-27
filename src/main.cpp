@@ -97,8 +97,8 @@ private:
 template <class Card_type>
 class Neo_player : public Base_player<Card_type, Neo_player<Card_type>> {
 public:
-    Neo_player(bool teamed, int id, Table<Card_type>& current_table, std::array<bool, 12> allowed_combos, std::string name)
-        : Base_player<Card_type, Neo_player>(teamed, id, current_table, allowed_combos), m_name(name)
+    Neo_player(bool teamed, int id, std::array<bool, 12> allowed_combos, std::string name)
+        : Base_player<Card_type, Neo_player>(teamed, id, allowed_combos), m_name(name)
     {}
 
     const std::string& get_name()
