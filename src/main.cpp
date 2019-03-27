@@ -11,9 +11,6 @@
 /* TODO: Find a way to record a game and replay it given a file, because repeating it is annoying (see notes)
  */
 
-/* Replace m_randeng in Game, and make fespar require a randegn passed to all functions
- */
-// TODO: FIX EVERYTHING
 template<class Game_type>
 void report_round(int& round, Game_type& game)
 {
