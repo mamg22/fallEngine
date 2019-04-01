@@ -1,0 +1,26 @@
+How to play Caída:
+
+In this game the main objective of each player (or team of players) is to get 24 or more points in different ways provided by the game mechanisms, be it by the Cantos (combos) which is when a player says the name of a specific combo, giving a specific amount of points depending on the combo the player has, and also receives points according to other game rules and card accumulation.
+
+This game can be played by 2-4 players or 2 teams of 2 players.
+
+This game uses Spanish playing cards, which use the values 1-7 and 10-12. 7 and 10 are treated as contiguous.
+
+The basics:
+
+Before the game begins, a player should be defined as the dealer, commonly all cards are laid on the table and each player picks a card at random, the one with the card of highest value is the dealer (if there's a tie this is repeated between the tied players). The dealer deals the deck for the first time.
+
+Then the dealer starts counting either starting from 1 up to 4 or from 4 down to 1, while dealing a card it says each number, dealing 4 cards to the table, if a number matches the card's value, that value is added to the dealer's score. If no card matches a count number, the table is "badly dealt", and the player that goes after the dealer gets a point. 
+
+After dealing the cards to the table, each player is dealt 3 cards, and the game begins.
+
+In a player's turn, it has to throw one of his cards, and:
+    If no card with the same value is on the table, then the player leaves the card in the table and ends the turn.
+    If a card with the same value is on the table, then the player can pick that card and put it in his accumulated cards.
+        The player can continue picking cards now with the same value, but with the previous picked card's value plus one, until there are no more cards that can be picked.
+    Examples:
+        a) Table: 3, 6, 10, 12; Hand: 1, 2, 5; The player can throw any card, but cannot pick any, because none matches.
+        b) Table: 2, 5, 7, 11; Hand: 2, 3, 10; The player can pick the 2 with his 2, or just throw the 3 or 10 (depending on strategy)
+        c) Table: 4, 6, 7, 10; Hand: 4, 6, 7; The player can pick the 4 with his 4, the 6, 7 and 10 using the 6 (can pick the 10 too, because 7 and 10 are contiguous), or the 7 and 10 using the 7.
+
+
