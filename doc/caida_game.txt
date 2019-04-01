@@ -17,10 +17,10 @@ After dealing the cards to the table, each player is dealt 3 cards, and the game
 In a player's turn, it has to throw one of his cards, and:
     If no card with the same value is on the table, then the player leaves the card in the table and ends the turn.
     If a card with the same value is on the table, then the player can pick that card and put it in his accumulated cards.
-        The player can continue picking cards now with the same value, but with the previous picked card's value plus one, until there are no more cards that can be picked.
+        The player can continue picking cards now with the same value, but with the previous picked card's value plus one, until there are no more cards that can be picked, note that the player isn't required to pick all possible cards, depending on the player's strategy, it can pick just the one matching, all possible, or something in between.
     Examples:
         a) Table: 3, 6, 10, 12; Hand: 1, 2, 5; The player can throw any card, but cannot pick any, because none matches.
         b) Table: 2, 5, 7, 11; Hand: 2, 3, 10; The player can pick the 2 with his 2, or just throw the 3 or 10 (depending on strategy)
-        c) Table: 4, 6, 7, 10; Hand: 4, 6, 7; The player can pick the 4 with his 4, the 6, 7 and 10 using the 6 (can pick the 10 too, because 7 and 10 are contiguous), or the 7 and 10 using the 7.
+        c) Table: 4, 6, 7, 10; Hand: 4, 6, 7; The player can pick the 4 with his 4, the 6, 7 and 10 using the 6 (can pick the 10 too, because 7 and 10 are contiguous), or the 7 and 10 using the 7, or just the 7 and leave the 10.
 
 
