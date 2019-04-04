@@ -55,7 +55,7 @@ When a hand is dealt, it can make one of the game combinations, which are:
 
 Special moves:
 
-Mesa limpia (Table clear): If a player after completing its turn, leaves the table with no cards in it, the player receives a bonus of 4 points.
+Mesa limpia (Table clear): If a player after completing its turn, leaves the table with no cards in it, the player receives a bonus of 4 points. Mesa limpia isn't awarded in the last round (i.e. The last deal of a deck).
 
 Caída (Fall): If a player only throws a card to the table in its turn (not picking anything), the next player can pick that card with one of its cards (and continue picking, of course), giving the player that threw the card a Caída, which value depends on the value of the card picked as part of the caida. The points awarded to the player that did the Caída (the picking player) are:
     1-7: 1 point.
