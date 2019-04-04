@@ -14,7 +14,7 @@ Then the dealer starts counting either starting from 1 up to 4 or from 4 down to
 
 After dealing the cards to the table, each player is dealt 3 cards, and the game begins.
 
-In a player's turn, it has to throw one of his cards, and:
+In a player's turn, it says the name of his combo, if has any, then it has to throw one of his cards, and:
     If no card with the same value is on the table, then the player leaves the card in the table and ends the turn.
     If a card with the same value is on the table, then the player can pick that card and put it in his accumulated cards.
         The player can continue picking cards now with the same value, but with the previous picked card's value plus one, until there are no more cards that can be picked, note that the player isn't required to pick all possible cards, depending on the player's strategy, it can pick just the one matching, all possible, or something in between.
@@ -23,4 +23,32 @@ In a player's turn, it has to throw one of his cards, and:
         b) Table: 2, 5, 7, 11; Hand: 2, 3, 10; The player can pick the 2 with his 2, or just throw the 3 or 10 (depending on strategy)
         c) Table: 4, 6, 7, 10; Hand: 4, 6, 7; The player can pick the 4 with his 4, the 6, 7 and 10 using the 6 (can pick the 10 too, because 7 and 10 are contiguous), or the 7 and 10 using the 7, or just the 7 and leave the 10.
 
+Once the player has finished collecting or placing cards, finished the turn and the next player starts its turn.
 
+After each player runs out of cards, a new round should be dealt.
+
+If a round ends and there are no more cards on the deck, each player counts its accumulated cards up to a limit, for each card over that limit, it is added to the player's score. The limits are:
+    2 players: 20.
+    3 players: Dealer 14, others 13.
+    4 players: 10.
+    teamed 2v2: Each team both player's accumulated count, then count up to 20, anything over that is added to the team's score.
+
+Combos:
+
+When a hand is dealt, it can make one of the game combinations, which are:
+    Ronda: Two cards of the same value and one with a different value. The points rewarded depend of the value of the card pair:
+        1-7: 1 point.
+        10:  2 points.
+        11:  3 points.
+        12:  4 points.
+    Trivilin: Three cards of the same value. A Trivilin of 12 makes the player instantly a winner. 5 points.
+    Ronda: Three cards in ascending order (e.g. 3, 4, 5 or 7, 10, 11). 12 does not wrap to 1. 6 points.
+    Vigia: Two cards of the same value and one with its value equal to the next or prior value of the pair (e.g. 4, 4, 5 or 7, 10, 10). 7 points.
+    Registro: Cards with the values 1, 11 and 12. 8 points.
+
+    The next combos are optional in a game, sometimes they're used, sometimes not:
+
+    Maguaro: Cards with the values 1, 10 and 12. 9 points.
+    Registrico: Cards with the values 1, 10 and 11. 10 points.
+    Casa Chica: Cards with the values 1, 11 and 11. 11 points.
+    Casa Grande: Cards with the values 1, 12 and 12. 12 points.
