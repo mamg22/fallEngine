@@ -14,6 +14,8 @@ Then the dealer starts counting either starting from 1 up to 4 or from 4 down to
 
 After dealing the cards to the table, each player is dealt 3 cards, and the game begins.
 
+The first player to play its cards is the one to the the left of the dealer.
+
 In a player's turn, it says the name of his combo, if has any, then it has to throw one of his cards, and:
     If no card with the same value is on the table, then the player leaves the card in the table and ends the turn.
     If a card with the same value is on the table, then the player can pick that card and put it in his accumulated cards.
@@ -23,7 +25,7 @@ In a player's turn, it says the name of his combo, if has any, then it has to th
         b) Table: 2, 5, 7, 11; Hand: 2, 3, 10; The player can pick the 2 with his 2, or just throw the 3 or 10 (depending on strategy)
         c) Table: 4, 6, 7, 10; Hand: 4, 6, 7; The player can pick the 4 with his 4, the 6, 7 and 10 using the 6 (can pick the 10 too, because 7 and 10 are contiguous), or the 7 and 10 using the 7, or just the 7 and leave the 10.
 
-Once the player has finished collecting or placing cards, finished the turn and the next player starts its turn.
+Once the player has finished collecting or placing cards, finishes the turn and the next player starts its turn.
 
 After each player runs out of cards, a new round should be dealt.
 
@@ -32,6 +34,8 @@ If a round ends and there are no more cards on the deck, each player counts its 
     3 players: Dealer 14, others 13.
     4 players: 10.
     teamed 2v2: Each team both player's accumulated count, then count up to 20, anything over that is added to the team's score.
+
+If after counting there aren't any winners, all cards are collected, shuffled and a new round starts with a new deck. The player to the left of the dealer becomes the new dealer. The game continues as specified above.
 
 Combos:
 
