@@ -1,20 +1,20 @@
 How to play Caída:
 
-In this game the main objective of each player (or team of players) is to get 24 or more points in different ways provided by the game mechanisms, be it by the Cantos (combos) which is when a player says the name of a specific combo, giving a specific amount of points depending on the combo the player has, and also receives points according to other game rules and card accumulation.
+In this game the main objective of each player (or team of players) is to get 24 or more points in different ways provided by the game mechanisms, be it by the Cantos (combos) which is when a player says the name of a specific combo it has, giving a specific amount of points depending on the combo the player has, and also receives points according to other game rules and card accumulation.
 
 This game can be played by 2-4 players or 2 teams of 2 players.
 
-This game uses Spanish playing cards, which use the values 1-7 and 10-12. 7 and 10 are treated as contiguous.
+This game uses Spanish playing cards, which use the values 1-7 and 10-12. 7 and 10 are treated as continuous.
 
 The basics:
 
-Before the game begins, a player should be defined as the dealer, commonly all cards are laid on the table and each player picks a card at random, the one with the card of highest value is the dealer (if there's a tie this is repeated between the tied players). The dealer deals the deck for the first time.
+Before the game begins, a player should be defined as the dealer, commonly all cards are laid on the table and each player picks a card at random, the one with the card of highest value is the dealer (if there's a tie this is repeated between the tied players). The dealer deals the deck for the first time. Other methods can be used to decide the dealer.
 
-Then the dealer starts counting either starting from 1 up to 4 or from 4 down to 1, while dealing a card it says each number, dealing 4 cards to the table, if a number matches the card's value, that value is added to the dealer's score. If no card matches a count number, the table is "badly dealt", and the player that goes after the dealer gets a point. 
+Then the dealer starts counting either starting from 1 up to 4 or from 4 down to 1, while dealing a card for each number, dealing 4 cards to the table, if a number matches the card's value, that value is added to the dealer's score. If no card matches a count number, the table is "badly dealt", and the player that goes after the dealer gets a point. 
 
 After dealing the cards to the table, each player is dealt 3 cards, and the game begins.
 
-The first player to play its cards is the one to the the left of the dealer.
+The first player to play its cards is the one to the left of the dealer.
 
 In a player's turn, it says the name of his combo, if has any, then it has to throw one of his cards, and:
     If no card with the same value is on the table, then the player leaves the card in the table and ends the turn.
@@ -23,7 +23,7 @@ In a player's turn, it says the name of his combo, if has any, then it has to th
     Examples:
         a) Table: 3, 6, 10, 12; Hand: 1, 2, 5; The player can throw any card, but cannot pick any, because none matches.
         b) Table: 2, 5, 7, 11; Hand: 2, 3, 10; The player can pick the 2 with his 2, or just throw the 3 or 10 (depending on strategy)
-        c) Table: 4, 6, 7, 10; Hand: 4, 6, 7; The player can pick the 4 with his 4, the 6, 7 and 10 using the 6 (can pick the 10 too, because 7 and 10 are contiguous), or the 7 and 10 using the 7, or just the 7 and leave the 10.
+        c) Table: 4, 6, 7, 10; Hand: 4, 6, 7; The player can pick the 4 with his 4, the 6, 7 and 10 using the 6 (can pick the 10 too, because 7 and 10 are continuous), or the 7 and 10 using the 7, or just the 7 and leave the 10.
 
 Once the player has finished collecting or placing cards, finishes the turn and the next player starts its turn.
 
@@ -33,9 +33,9 @@ If a round ends and there are no more cards on the deck, each player counts its 
     2 players: 20.
     3 players: Dealer 14, others 13.
     4 players: 10.
-    teamed 2v2: Each team both player's accumulated count, then count up to 20, anything over that is added to the team's score.
+    Teamed 2v2: Each team both player's accumulated count, then count up to 20, anything over that is added to the team's score.
 
-If after counting there aren't any winners, all cards are collected, shuffled and a new round starts with a new deck. The player to the left of the dealer becomes the new dealer. The game continues as specified above.
+If after counting there aren't any winners, all cards are collected, shuffled, and a new round starts. The player to the left of the dealer becomes the new dealer. The game continues as specified above.
 
 Combos:
 
@@ -63,7 +63,7 @@ Mesa limpia (Table clear): If a player after completing its turn, leaves the tab
 
 Caída (Fall): If a player only throws a card to the table in its turn (not picking anything), the next player can pick that card with one of its cards (and continue picking, of course), giving the player that threw the card a Caída, which value depends on the value of the card picked as part of the caida. The points awarded to the player that did the Caída (the picking player) are:
     1-7: 1 point.
-    10: 2 points.
-    11: 3 points.
-    12: 4 points.
+    10:  2 points.
+    11:  3 points.
+    12:  4 points.
 
