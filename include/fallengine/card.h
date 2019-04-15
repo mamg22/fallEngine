@@ -1,166 +1,169 @@
 #ifndef CARD_H_INCLUDED
 #define CARD_H_INCLUDED
 
-enum class Suit {
-    None,
-    Bastos,
-    Copas,
-    Espadas,
-    Oros
-};
+namespace falleng {
 
-class Card {
-public:
+    enum class Suit {
+        None,
+        Bastos,
+        Copas,
+        Espadas,
+        Oros
+    };
 
-    Card(int value, Suit suit = Suit::None)
-    : m_value(value), m_suit(suit)
-    {
-        if (value < 1 || value == 8 || value == 9 || value > 12){
-            m_value = -1; // Invalid card value
+    class Card {
+    public:
+
+        Card(int value, Suit suit = Suit::None)
+        : m_value(value), m_suit(suit)
+        {
+            if (value < 1 || value == 8 || value == 9 || value > 12){
+                m_value = -1; // Invalid card value
+            }
+
         }
 
-    }
+        int value() const
+        {
+            return m_value;
+        }
 
-    int value() const
+        Suit suit() const
+        {
+            return m_suit;
+        }
+
+        // these both return a copy of this card with increased/decreased value
+        Card operator+(int increase) const;
+
+        Card operator-(int decrease) const;
+
+    private:
+        int m_value = 1;
+        Suit m_suit = Suit::None;
+    };
+
+    Card Card::operator+(int increase) const
     {
-        return m_value;
+        int this_with_inc = m_value + increase;
+        if (this_with_inc == 8 || this_with_inc == 9){
+            this_with_inc += 2; // fixes the value: 8 -> 10 ; 9 -> 11
+        }
+        else if (this_with_inc <= 0 || this_with_inc >= 13){
+            this_with_inc = -1; // Invalid value, should make most comparisons invalid
+        }
+        return Card(this_with_inc, m_suit);
     }
 
-    Suit suit() const
+    Card Card::operator-(int decrease) const
     {
-        return m_suit;
+        int this_with_dec = m_value + decrease;
+        if (this_with_dec == 8 || this_with_dec == 9){
+            this_with_dec -= 2; // fixes the value: 9 -> 7 ; 8 -> 6
+        }
+        else if (this_with_dec <= 0 || this_with_dec >= 13){
+            this_with_dec = -1; // Invalid value, should make most comparisons invalid
+        }
+        return Card(this_with_dec, m_suit);
     }
 
-    // these both return a copy of this card with increased/decreased value
-    Card operator+(int increase) const;
-
-    Card operator-(int decrease) const;
-
-private:
-    int m_value = 1;
-    Suit m_suit = Suit::None;
-};
-
-Card Card::operator+(int increase) const
-{
-    int this_with_inc = m_value + increase;
-    if (this_with_inc == 8 || this_with_inc == 9){
-        this_with_inc += 2; // fixes the value: 8 -> 10 ; 9 -> 11
+    bool is_same_card(const Card& lhs, const Card& rhs)
+    {
+        return (lhs.value() == rhs.value()) && (lhs.suit() == rhs.suit());
     }
-    else if (this_with_inc <= 0 || this_with_inc >= 13){
-        this_with_inc = -1; // Invalid value, should make most comparisons invalid
+
+    // Boilerplate ahead
+
+    bool operator==(const Card& lhs, const Card& rhs)
+    {
+        return lhs.value() == rhs.value();
     }
-    return Card(this_with_inc, m_suit);
-}
 
-Card Card::operator-(int decrease) const
-{
-    int this_with_dec = m_value + decrease;
-    if (this_with_dec == 8 || this_with_dec == 9){
-        this_with_dec -= 2; // fixes the value: 9 -> 7 ; 8 -> 6
+    bool operator!=(const Card& lhs, const Card& rhs)
+    {
+        return lhs.value() != rhs.value();
     }
-    else if (this_with_dec <= 0 || this_with_dec >= 13){
-        this_with_dec = -1; // Invalid value, should make most comparisons invalid
+
+    bool operator< (const Card& lhs, const Card& rhs)
+    {
+        return lhs.value() < rhs.value();
     }
-    return Card(this_with_dec, m_suit);
-}
 
-bool is_same_card(const Card& lhs, const Card& rhs)
-{
-    return (lhs.value() == rhs.value()) && (lhs.suit() == rhs.suit());
-}
+    bool operator<=(const Card& lhs, const Card& rhs)
+    {
+        return lhs.value() <= rhs.value();
+    }
 
-// Boilerplate ahead
+    bool operator>=(const Card& lhs, const Card& rhs)
+    {
+        return lhs.value() >= rhs.value();
+    }
 
-bool operator==(const Card& lhs, const Card& rhs)
-{
-    return lhs.value() == rhs.value();
-}
+    bool operator> (const Card& lhs, const Card& rhs)
+    {
+        return lhs.value() > rhs.value();
+    }
 
-bool operator!=(const Card& lhs, const Card& rhs)
-{
-    return lhs.value() != rhs.value();
-}
+    bool operator==(const Card& lhs, int rhs)
+    {
+        return lhs.value() == rhs;
+    }
 
-bool operator< (const Card& lhs, const Card& rhs)
-{
-    return lhs.value() < rhs.value();
-}
+    bool operator!=(const Card& lhs, int rhs)
+    {
+        return lhs.value() != rhs;
+    }
 
-bool operator<=(const Card& lhs, const Card& rhs)
-{
-    return lhs.value() <= rhs.value();
-}
+    bool operator< (const Card& lhs, int rhs)
+    {
+        return lhs.value() < rhs;
+    }
 
-bool operator>=(const Card& lhs, const Card& rhs)
-{
-    return lhs.value() >= rhs.value();
-}
+    bool operator<=(const Card& lhs, int rhs)
+    {
+        return lhs.value() <= rhs;
+    }
 
-bool operator> (const Card& lhs, const Card& rhs)
-{
-    return lhs.value() > rhs.value();
-}
+    bool operator>=(const Card& lhs, int rhs)
+    {
+        return lhs.value() >= rhs;
+    }
 
-bool operator==(const Card& lhs, int rhs)
-{
-    return lhs.value() == rhs;
-}
+    bool operator> (const Card& lhs, int rhs)
+    {
+        return lhs.value() > rhs;
+    }
 
-bool operator!=(const Card& lhs, int rhs)
-{
-    return lhs.value() != rhs;
-}
+    bool operator==(int rhs, const Card& lhs)
+    {
+        return rhs == lhs.value();
+    }
 
-bool operator< (const Card& lhs, int rhs)
-{
-    return lhs.value() < rhs;
-}
+    bool operator!=(int rhs, const Card& lhs)
+    {
+        return rhs != lhs.value();
+    }
 
-bool operator<=(const Card& lhs, int rhs)
-{
-    return lhs.value() <= rhs;
-}
+    bool operator< (int rhs, const Card& lhs)
+    {
+        return rhs < lhs.value();
+    }
 
-bool operator>=(const Card& lhs, int rhs)
-{
-    return lhs.value() >= rhs;
-}
+    bool operator<=(int rhs, const Card& lhs)
+    {
+        return rhs <= lhs.value();
+    }
 
-bool operator> (const Card& lhs, int rhs)
-{
-    return lhs.value() > rhs;
-}
+    bool operator>=(int rhs, const Card& lhs)
+    {
+        return rhs >= lhs.value();
+    }
 
-bool operator==(int rhs, const Card& lhs)
-{
-    return rhs == lhs.value();
-}
+    bool operator> (int rhs, const Card& lhs)
+    {
+        return rhs > lhs.value();
+    }
 
-bool operator!=(int rhs, const Card& lhs)
-{
-    return rhs != lhs.value();
-}
-
-bool operator< (int rhs, const Card& lhs)
-{
-    return rhs < lhs.value();
-}
-
-bool operator<=(int rhs, const Card& lhs)
-{
-    return rhs <= lhs.value();
-}
-
-bool operator>=(int rhs, const Card& lhs)
-{
-    return rhs >= lhs.value();
-}
-
-bool operator> (int rhs, const Card& lhs)
-{
-    return rhs > lhs.value();
-}
-
+} // namespace falleng
 
 #endif // CARD_H_INCLUDED

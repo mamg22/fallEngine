@@ -15,7 +15,7 @@ template<class Game_type>
 void report_round(int& round, Game_type& game)
 {
     if (!game.is_playing()) {return;};
-    try {game.current_player();} catch (Player_not_found_exception& e){return;}
+    try {game.current_player();} catch (falleng::Player_not_found_exception& e){return;}
     std::cout << "Round: " << round++ << "\n===============================\n" <<
     "CP: " << game.current_player().id() << " DP: " << game.dealer().id() << " BC: " << game.best_combo_p().id() << "\n\n";
 }
@@ -25,7 +25,7 @@ template<class Game_type>
 void print_state(Game_type& game)
 {
     if (!game.is_playing()) {return;};
-    try {game.current_player();} catch (Player_not_found_exception& e){return;}
+    try {game.current_player();} catch (falleng::Player_not_found_exception& e){return;}
     std::cout << "Table: ";
     for (auto& card : game.get_table_cards()){
         std::cout << card.get_color() << card.value() << ' ' << static_cast<char>(static_cast<int>(card.suit())+0x40) << " \t" ;
@@ -67,9 +67,9 @@ bool y_n_ask(std::string prompt)
     return choice == 'y' || choice == 'Y';
 }
 
-class Neo_card : public Card {
+class Neo_card : public falleng::Card {
 public:
-    using Card::Card;
+    using falleng::Card::Card;
     std::string& get_color()
     {
         return m_color;
@@ -79,9 +79,9 @@ private:
 };
 
 template<class Card_type>
-class Neo_table : public Table<Card_type> {
+class Neo_table : public falleng::Table<Card_type> {
 public:
-    using Table<Card_type>::Table;
+    using falleng::Table<Card_type>::Table;
     void set_color(std::string& color)
     {
         m_color = color;
@@ -95,10 +95,10 @@ private:
 };
 
 template <class Card_type>
-class Neo_player : public Base_player<Card_type, Neo_player<Card_type>> {
+class Neo_player : public falleng::Base_player<Card_type, Neo_player<Card_type>> {
 public:
     Neo_player(bool teamed, int id, std::array<bool, 12> allowed_combos, std::string name)
-        : Base_player<Card_type, Neo_player>(teamed, id, allowed_combos), m_name(name)
+        : falleng::Base_player<Card_type, Neo_player>(teamed, id, allowed_combos), m_name(name)
     {}
 
     const std::string& get_name()
@@ -111,15 +111,15 @@ private:
 
 
 template<class Card_type, class Player_type, class Table_type>
-class Neo_game : public Game<Card_type, Player_type, Table_type> {
+class Neo_game : public falleng::Game<Card_type, Player_type, Table_type> {
 public:
-    Neo_game(bool teamed, Combo max_combo_allowed, const std::string& color)
-        : Game<Card_type, Player_type, Table_type>(teamed, max_combo_allowed)
+    Neo_game(bool teamed, falleng::Combo max_combo_allowed, const std::string& color)
+        : falleng::Game<Card_type, Player_type, Table_type>(teamed, max_combo_allowed)
         , m_color(color)
     {}
     
     Neo_game(bool teamed, std::array<bool, 12> max_combo_allowed, const std::string& color)
-        : Game<Card_type, Player_type, Table_type>(teamed, max_combo_allowed)
+        : falleng::Game<Card_type, Player_type, Table_type>(teamed, max_combo_allowed)
         , m_color(color)
     {}
 
@@ -154,7 +154,7 @@ int main()
     }
     
     Neo_game<Neo_card, Neo_player<Neo_card>, Neo_table<Neo_card>> game(teamed, combos, "\033[36m");
-    Fespar<decltype(game), decltype(eng)> fes(game, eng);
+    falleng::fespar::Fespar<decltype(game), decltype(eng)> fes(game, eng);
     
     fes.add_op("Gap", [&](std::vector<std::string>& args){args.empty() ? game.add_player("None") : game.add_player(args[0]); return 0;});
 
@@ -174,7 +174,7 @@ int main()
         try {
             fes.exec_op(arguments);
         }
-        catch (Op_not_valid_currently_exception& e){
+        catch (falleng::Op_not_valid_currently_exception& e){
             std::cout << '\n' << e.what() << '\n';
         }
         if (game.get_last_state().winner_found) break;
