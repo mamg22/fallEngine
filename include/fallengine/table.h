@@ -88,7 +88,8 @@ namespace falleng {
     void Table<Card_type>::deal(FWIterator begin, FWIterator end)
     {
         for (; begin != end; begin++){
-            deal_to(*begin);
+            begin->set_cards(m_deck.begin(), m_deck.begin() + 3);
+            m_deck.erase(m_deck.begin(), m_deck.begin() + 3);
         }
     }
 
@@ -132,15 +133,6 @@ namespace falleng {
     {
         m_deck.assign(begin, end);
     }
-
-    template<class Card_type>
-    template<class Player_type>
-    void Table<Card_type>::deal_to(Player_type& player)
-    {
-        player.set_cards(m_deck.begin(), m_deck.begin() + 3);
-        m_deck.erase(m_deck.begin(), m_deck.begin() + 3);
-    }
-
 
     template<class Card_type>
     bool Table<Card_type>::take_card(Card_type& card)
