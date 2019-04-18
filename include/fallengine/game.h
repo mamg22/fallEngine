@@ -42,13 +42,13 @@ namespace falleng {
     template<class Card_type, class Player_type, class Table_type>
     class Game {
     public:
-        explicit Game(bool teamed, Combo max_combo_allowed)
+        Game(bool teamed, Combo max_combo_allowed)
             : m_is_teamed(teamed)
         {
             fill_cards();
             std::fill_n(m_allowed_combos.begin(), static_cast<int>(max_combo_allowed), true);
         }
-        explicit Game(bool teamed, std::array<bool, 12> allowed_combos)
+        Game(bool teamed, std::array<bool, 12>& allowed_combos)
             : m_is_teamed(teamed), m_allowed_combos(allowed_combos)
         {
             fill_cards();
