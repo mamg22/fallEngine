@@ -41,13 +41,9 @@ namespace falleng {
             return m_last_card_placed;
         }
 
-        // deal to a player
-        template<class Player_type>
-        void deal_to(Player_type& player);
-
         // deal to each player in a range
         template<class FWIterator>
-        void deal(FWIterator begin, FWIterator end);
+        void deal(std::array<bool, 12>& allowed_combos, FWIterator begin, FWIterator end);
 
         // Deals the cards for a first round, while counting 1..4 (or 4..1) if
         // count_from_4, if a card repeats, ignore and try the next, if a card's
@@ -85,10 +81,10 @@ namespace falleng {
 
     template<class Card_type>
     template<class FWIterator>
-    void Table<Card_type>::deal(FWIterator begin, FWIterator end)
+    void Table<Card_type>::deal(std::array<bool, 12>& allowed_combos, FWIterator begin, FWIterator end)
     {
         for (; begin != end; begin++){
-            begin->set_cards(m_deck.begin(), m_deck.begin() + 3);
+            begin->set_cards(allowed_combos, m_deck.begin(), m_deck.begin() + 3);
             m_deck.erase(m_deck.begin(), m_deck.begin() + 3);
         }
     }

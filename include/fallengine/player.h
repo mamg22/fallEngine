@@ -25,12 +25,8 @@ namespace falleng {
     template<class Card_type, class This_classname>
     class Base_player {
     public:
-        Base_player(bool teamed, int id, Combo max_combo)
-            : m_hand(max_combo), m_id(id), m_teamed(teamed)
-        {
-        }
-        Base_player(bool teamed, int id, std::array<bool, 12> allowed_combos)
-            : m_hand(allowed_combos), m_id(id), m_teamed(teamed) 
+        Base_player(bool teamed, int id)
+            : m_id(id), m_teamed(teamed)
         {
         }
 
@@ -88,11 +84,10 @@ namespace falleng {
             increase_score(static_cast<int>(combo));
         }
 
-
         // Forwards to (member hand).set_cards, accepts a iterator pair of the deck
         // from which the cards will be extracted
         template<class FWIterator>
-        void set_cards(FWIterator begin, FWIterator end);
+        void set_cards(std::array<bool, 12>& allowed_combos, FWIterator begin, FWIterator end);
 
         void set_partner(This_classname& partner)
         {
@@ -170,9 +165,9 @@ namespace falleng {
 
     template<class Card_type, class This_classname>
     template<class FWIterator>
-    void Base_player<Card_type, This_classname>::set_cards(FWIterator begin, FWIterator end)
+    void Base_player<Card_type, This_classname>::set_cards(std::array<bool, 12>& allowed_combos, FWIterator begin, FWIterator end)
     {
-        m_hand.set_cards(begin, end);
+        m_hand.set_cards(allowed_combos, begin, end);
     }
 
     template<class Card_type, class This_classname>

@@ -284,7 +284,7 @@ namespace falleng {
     void Game<Card_type, Player_type, Table_type>::add_player(Args... args)
     {
         if (m_is_playing){throw Op_not_valid_currently_exception("add_player", false);}
-        m_players.push_back(Player_type(m_is_teamed, m_id_count++, m_allowed_combos, std::forward<Args>(args)...));
+        m_players.push_back(Player_type(m_is_teamed, m_id_count++, std::forward<Args>(args)...));
     }
 
     template<class Card_type, class Player_type, class Table_type>
@@ -331,7 +331,7 @@ namespace falleng {
                     for (auto& player : m_players){
                         player.reset_hand();
                     }
-                    m_table.deal(m_players.begin(), m_players.end());
+                    m_table.deal(m_allowed_combos, m_players.begin(), m_players.end());
                     
 
                     for (auto& player: m_players){
@@ -398,7 +398,7 @@ namespace falleng {
                 }
 
 
-                m_table.deal(m_players.begin(), m_players.end());
+                m_table.deal(m_allowed_combos, m_players.begin(), m_players.end());
 
                 for (auto& player: m_players){
                     auto& cards = player.get_cards();
