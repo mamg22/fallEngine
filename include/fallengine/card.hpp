@@ -1,5 +1,5 @@
-#ifndef CARD_H_INCLUDED
-#define CARD_H_INCLUDED
+#ifndef FALLENGINE_FALLENG_CARD_HPP_INCLUDED
+#define FALLENGINE_FALLENG_CARD_HPP_INCLUDED
 
 namespace falleng {
 
@@ -166,4 +166,4 @@ namespace falleng {
 
 } // namespace falleng
 
-#endif // CARD_H_INCLUDED
+#endif // FALLENGINE_FALLENG_CARD_HPP_INCLUDED

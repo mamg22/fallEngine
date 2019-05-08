@@ -1,5 +1,5 @@
-#ifndef PLAYER_H_INCLUDED
-#define PLAYER_H_INCLUDED
+#ifndef FALLENGINE_FALLENG_PLAYER_HPP_INCLUDED
+#define FALLENGINE_FALLENG_PLAYER_HPP_INCLUDED
 
 #include <string>
 #include <deque>
@@ -9,8 +9,8 @@
 #include <exception>
 #include <utility>
 
-#include "hand.h"
-#include "table.h"
+#include "hand.hpp"
+#include "table.hpp"
 
 namespace falleng {
 
@@ -305,4 +305,4 @@ namespace falleng {
 
 } // namespace falleng
 
-#endif // PLAYER_H_INCLUDED
+#endif // FALLENGINE_FALLENG_PLAYER_HPP_INCLUDED

@@ -1,5 +1,5 @@
-#include "include/fallengine.h"
-#include "include/tests/tests_main.h"
+#include "include/fallengine.hpp"
+#include "include/tests/tests_main.hpp"
 
 /*
    This test should do:

@@ -5,8 +5,8 @@
 #include <sstream>
 #include <array>
 
-#include "../include/fallengine/fallengine.h"
-#include "../include/fespar/fespar.h"
+#include "../include/fallengine/fallengine.hpp"
+#include "../include/fespar/fespar.hpp"
 
 /* TODO: Find a way to record a game and replay it given a file, because repeating it is annoying (see notes)
  */

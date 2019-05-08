@@ -1,12 +1,51 @@
-# Todo: rewrite this to be a specification for a standard interface between programs that implement this library
-# That sounds like a good idea for me
+WIP: Kind of a uniform interface so different clients can communicate with others, but still thinking if its a good idea.
+Fespar commands available at the bottom.
 
 Fallengine communication interface
 
-This is a specification for a common communication interface for the FallEngine library, which may allow to 
+This is a specification for the FallEngine Common Communication Interface (FECCI), which may allow to 
 communicate between two implementers of this library, be it the same program or not, allow game recording and replaying,
 client-server architectures, and scripted testing. All of this by providing a text based way of executing commands on a game.
 
+Commands
+
+Commands are the base of the FECCI, everything (may change in the future) in the FECCI is a command. 
+The basic structure of a command is:
+
+    <command> [arguments...] <command terminator>
+
+Where <> means required, and [] optional.
+
+Documentation for commands should use this structure:
+
+    <command> [<argument name>:<argument type>[=<default value>]... ] <command terminator>
+
+<command>: Specifies a instruction to the game. A valid command name is composed only from uppercase and lowercase letters.
+Commands that begin with [FGPTZfgptz] are reserved for FallEngine. 
+Commands that begin with uppercase are Pre-game commands, before a game has started.
+Commands that begin with lowercase are In-Game commands, during a game.
+
+...: Variable lenght list of arguments.
+
+[arguments]: A space separated list of arguments, ends when a command terminator is found.
+Newlines, spaces and semicolons can't be used in arguments, unless they are escaped with backslashes ('\') or
+they are quoted using double quotes ('"'). Double quotes can be used inside or outside quoted stings by escaping them.
+
+<argument name>: The name of the argument, should be descriptive.
+
+<argument type>: The type of the argument, it is one of:
+    string: Any string of text, unquoted or quoted (quotes are not included in the string).
+    int: An integer.
+    bool: A boolean, the values 'F' and 'T' indicate false and true respectively.
+
+<default value>: The default value of the argument if not given, defaults can only be at the end of a list.
+
+<command terminator>: Indicates the end of a command, it is either a newline ('\n', or whatever it is on your system), or a
+semicolon (';').
+
+
+
+Presentation commands
 
 
 ##################################################################################################

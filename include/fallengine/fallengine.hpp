@@ -1,5 +1,5 @@
-#ifndef FALLENGINE_H_INCLUDED
-#define FALLENGINE_H_INCLUDED
+#ifndef FALLENGINE_FALLENG_HPP_INCLUDED
+#define FALLENGINE_FALLENG_HPP_INCLUDED
 
 /*
  *                            .
@@ -28,10 +28,10 @@
  *
  */
 
-#include "game.h"
-#include "player.h"
-#include "table.h"
-#include "hand.h"
-#include "card.h"
+#include "game.hpp"
+#include "player.hpp"
+#include "table.hpp"
+#include "hand.hpp"
+#include "card.hpp"
 
-#endif // FALLENGINE_H_INCLUDED
+#endif // FALLENGINE_FALLENG_HPP_INCLUDED

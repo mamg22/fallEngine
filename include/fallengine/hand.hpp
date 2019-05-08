@@ -1,5 +1,5 @@
-#ifndef HAND_H_INCLUDED
-#define HAND_H_INCLUDED
+#ifndef FALLENGINE_FALLENG_HAND_HPP_INCLUDED
+#define FALLENGINE_FALLENG_HAND_HPP_INCLUDED
 
 #include <string>
 #include <vector>
@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <array>
 
-#include "card.h"
+#include "card.hpp"
 
 //TODO: Make m_allowed_combos a parameter to set_cards, makes the class smaller and easier to use, also move the logic from the
 // constructor to two overloads of set_cards
@@ -211,4 +211,4 @@ namespace falleng {
 
 } // namespace falleng
 
-#endif // HAND_H_INCLUDED
+#endif // FALLENGINE_FALLENG_HAND_HPP_INCLUDED

@@ -1,5 +1,5 @@
-#ifndef TABLE_H_INCLUDED
-#define TABLE_H_INCLUDED
+#ifndef FALLENGINE_FALLENG_TABLE_HPP_INCLUDED
+#define FALLENGINE_FALLENG_TABLE_HPP_INCLUDED
 
 #include <algorithm>
 #include <utility>
@@ -216,4 +216,4 @@ namespace falleng {
 
 } // namespace falleng
 
-#endif // TABLE_H_INCLUDED
+#endif // FALLENGINE_FALLENG_TABLE_HPP_INCLUDED

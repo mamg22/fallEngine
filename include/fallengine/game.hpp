@@ -1,5 +1,5 @@
-#ifndef GAME_H_INCLUDED
-#define GAME_H_INCLUDED
+#ifndef FALLENGINE_FALLENG_GAME_HPP_INCLUDED
+#define FALLENGINE_FALLENG_GAME_HPP_INCLUDED
 
 
 #include <memory>
@@ -11,9 +11,9 @@
 #include <array>
 #include <iostream>
 
-#include "card.h"
-#include "table.h"
-#include "player.h"
+#include "card.hpp"
+#include "table.hpp"
+#include "player.hpp"
 
 namespace falleng {
 
@@ -508,4 +508,4 @@ namespace falleng {
 
 } // namespace falleng
 
-#endif // GAME_H_INCLUDED
+#endif // FALLENGINE_FALLENG_GAME_HPP_INCLUDED

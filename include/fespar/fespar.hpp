@@ -1,5 +1,5 @@
-#ifndef FESPAR_H_INCLUDED
-#define FESPAR_H_INCLUDED
+#ifndef FALLENGINE_FESPAR_FESPAR_HPP_INCLUDED
+#define FALLENGINE_FESPAR_FESPAR_HPP_INCLUDED
 
 #include <iostream>
 #include <string>
@@ -7,7 +7,7 @@
 #include <map>
 #include <functional>
 
-#include "../fallengine/fallengine.h"
+#include "../fallengine/fallengine.hpp"
 
 namespace falleng::fespar {
 
@@ -142,4 +142,4 @@ namespace falleng::fespar {
 
 } // namespace falleng::fespar
 
-#endif // FESPAR_H_INCLUDED
+#endif // FALLENGINE_FESPAR_FESPAR_HPP_INCLUDED
